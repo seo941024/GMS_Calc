@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>방학 및 향후 학습 계획서</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:   #1a2744;
+    --rule:   #b0bac8;
+    --accent: #2d5fa6;
+    --bg:     #f7f8fa;
+    --text:   #1e1e1e;
+    --sub:    #4a5568;
+    --white:  #ffffff;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+    font-size: 10.5pt;
+    line-height: 2;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .doc {
+    max-width: 780px;
+    margin: 48px auto 80px;
+    background: var(--white);
+    border: 1px solid #d6dce8;
+    box-shadow: 0 2px 16px rgba(0,0,0,.08);
+    padding: 72px 80px;
+  }
+
+  /* 헤더 */
+  .doc-header {
+    border-bottom: 2.5px solid var(--navy);
+    padding-bottom: 28px;
+    margin-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .doc-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 22pt;
+    font-weight: 700;
+    color: var(--navy);
+    text-align: center;
+  }
+
+  /* 섹션 */
+  .section { margin-bottom: 44px; }
+
+  .section-title {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .section-num {
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: .06em;
+  }
+
+  .section-title h2 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 12.5pt;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  /* 본문 */
+  p {
+    text-indent: 1em;
+    margin-bottom: 13px;
+    color: var(--text);
+    word-break: keep-all;
+  }
+
+  .sub-title {
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: var(--navy);
+    margin: 22px 0 9px;
+    padding-left: 10px;
+    border-left: 3px solid var(--accent);
+  }
+
+  ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 14px;
+  }
+
+  ul li {
+    position: relative;
+    padding-left: 16px;
+    margin-bottom: 5px;
+    color: var(--text);
+  }
+
+  ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: .75em;
+    width: 5px;
+    height: 1.5px;
+    background: var(--accent);
+  }
+
+  /* 일정표 */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0 20px;
+    font-size: 9.5pt;
+  }
+
+  .schedule-table th {
+    background: var(--navy);
+    color: var(--white);
+    padding: 9px 14px;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .schedule-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #e2e6ee;
+    vertical-align: top;
+    line-height: 1.8;
+  }
+
+  .schedule-table tr:last-child td { border-bottom: none; }
+  .schedule-table tr:nth-child(even) td { background: #f4f6fb; }
+
+  @media print {
+    body { background: white; }
+    .doc { border: none; box-shadow: none; margin: 0; padding: 40px 52px; }
+  }
+
+  @media (max-width: 600px) {
+    .doc { padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="doc">
+
+  <div class="doc-header">
+    <h1 class="doc-title">방학 및 향후 학습 계획서</h1>
+  </div>
+
+  <!-- 1 -->
+  <div class="section">
+    <div class="section-title">
+      <span class="section-num">01</span>
+      <h2>학습 및 프로젝트 수행 현황</h2>
+    </div>
+
+    <p>2026년 3월 입학 이후 현재까지 프로그래밍 기초 역량 강화와 실무형 프로젝트 수행을 병행하며 학업에 임하고 있다. 전공 이론 학습에 그치지 않고 직접 결과물을 만들어 보는 경험을 중시하여, 각 월별로 구체적인 프로젝트 목표를 설정하고 이를 달성해 나가는 방식으로 학습을 이어가고 있다.</p>
+
+    <p>입학 초기인 3월에는 Python 프로그래밍, 데이터베이스, 알고리즘 등 기초 전공 과목을 집중적으로 학습하였다. 입학 이전 프로그래밍 경험이 거의 없었던 만큼, 수업 복습과 연습문제 반복 풀이를 통해 기본기를 다지는 데 주력하였다. 낯선 개념이 등장할 때마다 공식 문서와 예제 코드를 적극 참고하며 스스로 문제를 해결하는 습관을 형성하였고, 이와 동시에 정보처리기사 필기시험 대비를 위한 전공 이론 학습도 체계적으로 진행하였다.</p>
+
+    <p>4월에는 HTML, CSS, JavaScript를 활용한 웹 개발로 학습 범위를 확장하였다. 단순히 따라 만드는 수준을 넘어, 개인 프로젝트로 To-Do List 웹 애플리케이션을 기획부터 구현까지 직접 완성하였다. 사용자 인터페이스 설계, 이벤트 처리, 로컬 데이터 관리 기능을 구현하는 과정에서 프론트엔드 개발의 전반적인 흐름을 체험할 수 있었다. 아울러 외부 공모전에 참가하여 팀 단위로 프로젝트를 기획하고 개발하는 협업 경험도 쌓았다.</p>
+
+    <p>5월에는 HTML과 JavaScript를 기반으로 한 웹 게임 개발 프로젝트에 참여하였다. 캐릭터 시스템, 전투 로직, 인게임 UI 등 다양한 기능을 팀원과 역할 분담하여 구현하였으며, 이 과정에서 코드 품질 관리와 협업 시 발생하는 충돌 해결 방법을 직접 경험할 수 있었다. 또한 정보처리기사 필기시험에 응시하였으며, 시험 직후부터 약 2주간 SQLD 자격증 취득을 목표로 데이터베이스 이론과 SQL 문법을 집중 학습하여 시험에 응시하였다.</p>
+
+    <p>최근에는 팀 프로젝트로 진행된 AI 기반 주차장 관리 시스템 개발을 성공적으로 마무리하였다. Python, Flet, SQLite, YOLO, EasyOCR을 기술 스택으로 활용하여 차량 번호판 실시간 인식, 입·출차 데이터 저장 및 조회, GUI 기반 관리자 화면 구현 등을 진행하였다. 단순 기능 구현에 그치지 않고 실제 운영 환경을 가정하여 예외 처리와 데이터 정합성까지 고려하며 개발에 임하였으며, 팀 내 핵심 개발 파트를 책임지고 주도하여 완성도 높은 결과물을 도출하였다.</p>
+  </div>
+
+  <!-- 2 -->
+  <div class="section">
+    <div class="section-title">
+      <span class="section-num">02</span>
+      <h2>주요 프로젝트 수행 내용</h2>
+    </div>
+
+    <div class="sub-title">To-Do List 웹 애플리케이션</div>
+    <ul>
+      <li>HTML, CSS, JavaScript만을 활용한 순수 프론트엔드 개발 (별도 라이브러리 미사용)</li>
+      <li>일정 등록·수정·삭제 및 완료 처리 기능 구현</li>
+      <li>localStorage를 활용한 브라우저 내 데이터 영속성 확보</li>
+      <li>반응형 UI 설계를 통해 모바일·데스크톱 환경 모두 대응</li>
+    </ul>
+
+    <div class="sub-title">웹 게임 개발 프로젝트</div>
+    <ul>
+      <li>캐릭터 능력치 시스템 및 전투 로직 설계·구현</li>
+      <li>게임 내 UI(체력바, 스킬 버튼, 전투 로그 등) 개발</li>
+      <li>팀원 간 역할 분담을 통한 협업 개발 경험 및 코드 리뷰 진행</li>
+      <li>JavaScript 이벤트 루프 및 상태 관리 패턴 실습</li>
+    </ul>
+
+    <div class="sub-title">AI 기반 주차장 관리 시스템 (완료)</div>
+    <ul>
+      <li>Python 및 Flet 프레임워크를 활용한 데스크톱 GUI 애플리케이션 개발</li>
+      <li>YOLO 모델을 활용한 차량 번호판 실시간 탐지 및 영역 추출</li>
+      <li>EasyOCR을 통한 번호판 문자 인식 및 신뢰도 향상을 위한 후처리 로직 구현</li>
+      <li>SQLite 기반 입·출차 이력 데이터 저장, 조회, 삭제 기능 최적화</li>
+      <li>관리자용 대시보드 및 차량 이력 필터링 검색 기능 구현</li>
+    </ul>
+  </div>
+
+  <!-- 3 -->
+  <div class="section">
+    <div class="section-title">
+      <span class="section-num">03</span>
+      <h2>방학 중 자격증 학습 계획</h2>
+    </div>
+
+    <p>방학 기간 동안 자격증 취득을 통해 실력을 객관적으로 검증하고, 이를 포트폴리오와 연계하여 취업 경쟁력을 강화할 계획이다. 각 자격증의 시험 일정에 맞추어 월별로 집중 학습 기간을 설정하고, 기출문제 풀이와 이론 학습을 병행하는 방식으로 준비할 예정이다.</p>
+
+    <table class="schedule-table">
+      <thead>
+        <tr>
+          <th>시기</th>
+          <th>자격증</th>
+          <th>학습 방향</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2026년 7월</td>
+          <td>정보처리기사 실기</td>
+          <td>알고리즘·SQL·업무 프로세스 유형별 기출 반복 풀이, 약점 파트 집중 보완</td>
+        </tr>
+        <tr>
+          <td>2026년 8월</td>
+          <td>ADsP (데이터분석 준전문가)</td>
+          <td>데이터 분석 기획·처리·탐색 이론 학습 및 통계 개념 정리, 실전 문제 풀이</td>
+        </tr>
+        <tr>
+          <td>2026년 9월</td>
+          <td>빅데이터 관련 자격증</td>
+          <td>빅데이터 처리 기술(Hadoop, Spark 등) 및 분석 기법 개요 학습, 자격증 유형에 맞는 문제 풀이</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>단순 합격을 목표로 하는 것이 아니라, 각 자격증에서 다루는 개념을 실제 프로젝트에 접목할 수 있도록 이해 중심의 학습을 지향한다. 특히 ADsP와 빅데이터 자격증 학습 과정에서 습득하는 데이터 분석 역량은 방학 중 개발할 프로젝트에도 적극 활용할 계획이다.</p>
+  </div>
+
+  <!-- 4 -->
+  <div class="section">
+    <div class="section-title">
+      <span class="section-num">04</span>
+      <h2>방학 중 프로젝트 계획</h2>
+    </div>
+
+    <div class="sub-title">게임 데이터 관리 및 수익 분석 웹 시스템</div>
+
+    <p>방학 기간 중 HTML, CSS, JavaScript를 활용하여 데이터 관리 중심의 웹 애플리케이션을 자력 개발할 계획이다. 본 시스템은 온라인 게임 내 여러 캐릭터의 활동 기록과 수익 데이터를 체계적으로 저장·조회·분석하기 위한 목적으로 기획되었으며, 실제 본인이 직접 사용하는 것을 전제로 개발한다. 단순한 정적 웹페이지가 아닌, 데이터의 흐름과 상태 관리를 직접 설계하고 구현하는 실질적 소프트웨어 개발 경험을 목표로 한다.</p>
+
+    <ul>
+      <li>캐릭터별 정보(직업, 레벨 등) 등록 및 수정·삭제 기능</li>
+      <li>일별·주별 활동 기록 입력 및 이력 조회</li>
+      <li>수익 자동 계산 및 캐릭터별 누적 수익 집계</li>
+      <li>기간별 수익 비교 통계 및 그래프 시각화 (Chart.js 활용 예정)</li>
+      <li>전체 데이터 대시보드 구성 (요약 카드, 순위, 추이 등)</li>
+      <li>JSON 기반 데이터 내보내기·불러오기(백업·복원) 기능</li>
+    </ul>
+
+    <p>이 프로젝트를 통해 프론트엔드 상태 관리 설계, 데이터 시각화 라이브러리 활용, 사용자 경험(UX)을 고려한 UI 구성 등 실무와 직결되는 역량을 집중적으로 강화할 계획이다.</p>
+  </div>
+
+  <!-- 5 -->
+  <div class="section">
+    <div class="section-title">
+      <span class="section-num">05</span>
+      <h2>포트폴리오 구축 계획</h2>
+    </div>
+
+    <p>프로젝트 수행 과정에서 설계 내용, 구현 과정, 발생한 문제와 해결 과정을 꾸준히 기록하여 취업 활동에 실질적으로 활용할 수 있는 포트폴리오를 구축할 계획이다. 완성된 결과물만을 보여주는 데 그치지 않고, 어떤 고민을 거쳐 설계를 결정했는지, 어떤 오류를 만나 어떻게 해결했는지를 함께 담아 성장 과정 자체가 드러나는 포트폴리오를 지향한다.</p>
+
+    <ul>
+      <li>프로젝트 개요, 기획 배경 및 개발 목적</li>
+      <li>주요 기능 소개 및 기술 스택 정리</li>
+      <li>데이터베이스 설계 내용 (ERD, 테이블 정의서 포함)</li>
+      <li>핵심 기능 구현 과정 및 트러블슈팅 사례</li>
+      <li>결과 화면 캡처 및 시연 영상 자료</li>
+      <li>GitHub 저장소 연계를 통한 커밋 이력·코드 공개</li>
+    </ul>
+
+    <p>GitHub를 중심으로 코드와 문서를 함께 관리하고, 각 프로젝트별 README를 충실하게 작성하여 코드를 보지 않더라도 프로젝트의 성격과 기여도가 명확히 전달될 수 있도록 준비할 예정이다.</p>
+  </div>
+
+  <!-- 6 -->
+  <div class="section">
+    <div class="section-title">
+      <span class="section-num">06</span>
+      <h2>향후 목표</h2>
+    </div>
+
+    <ul>
+      <li>정보처리기사 실기 합격을 통한 기술 역량 공식 검증</li>
+      <li>ADsP 및 빅데이터 관련 자격증 취득으로 데이터 분야 전문성 확보</li>
+      <li>AI 기반 주차장 관리 시스템의 완벽한 종료 및 기술 자산화</li>
+      <li>게임 데이터 관리 및 수익 분석 웹 시스템 독자 개발 완료</li>
+      <li>GitHub 기반 포트폴리오 구축 및 취업 활동 준비 완료</li>
+      <li>데이터 관리·웹 기반 소프트웨어 개발자로의 성장</li>
+    </ul>
+
+    <p>단기적으로는 자격증 취득과 프로젝트 완성을 통해 역량을 증명하고, 중장기적으로는 HTML, CSS, JavaScript 기반의 웹 개발 역량과 데이터베이스 활용 능력을 결합하여 실무에서 독립적으로 데이터 관리 시스템과 웹 기반 소프트웨어를 설계·개발할 수 있는 개발자로 성장하는 것을 최우선 목표로 삼고 있다. 이를 위해 방학 기간을 핵심 성장 기회로 삼아 계획한 학습과 개발을 충실히 수행할 것이다.</p>
+  </div>
+
+  <!-- 7 -->
+  <div class="section">
+    <div class="section-title">
+      <span class="section-num">07</span>
+      <h2>7월 ~ 11월 주차별 세부 일정표</h2>
+    </div>
+
+    <table class="schedule-table">
+      <thead>
+        <tr>
+          <th style="width: 15%;">월별</th>
+          <th style="width: 15%;">주차</th>
+          <th style="width: 70%;">세부 실행 계획</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 7월 -->
+        <tr>
+          <td rowspan="4" style="vertical-align: middle; font-weight: 600;">7월</td>
+          <td>1주차</td>
+          <td>정보처리기사 실기 알고리즘 및 프로그래밍 핵심 구문 분석</td>
+        </tr>
+        <tr>
+          <td>2주차</td>
+          <td>데이터베이스 및 고급 SQL 응용 기출문제 집중 풀이</td>
+        </tr>
+        <tr>
+          <td>3주차</td>
+          <td>정보처리기사 실기 최종 모의고사 풀이 및 취약 단원 보완</td>
+        </tr>
+        <tr>
+          <td>4주차</td>
+          <td>게임 데이터 관리 웹 시스템 요구사항 정의 및 DB 데이터 구조 설계</td>
+        </tr>
+
+        <!-- 8월 -->
+        <tr>
+          <td rowspan="5" style="vertical-align: middle; font-weight: 600;">8월</td>
+          <td>1주차</td>
+          <td>ADsP 데이터 이해/분석 기획 파트 정리 및 독자 프로젝트 UI 레이아웃 구현</td>
+        </tr>
+        <tr>
+          <td>2주차</td>
+          <td>ADsP 통계학 기초 개념 확립 및 독자 프로젝트 핵심 연산/누적 로직 개발</td>
+        </tr>
+        <tr>
+          <td>3주차</td>
+          <td>ADsP R 분석 패키지 결과 해석 학습 및 독자 프로젝트 Chart.js 시각화 구현</td>
+        </tr>
+        <tr>
+          <td>4주차</td>
+          <td>ADsP 기출문제 오답 정리 및 시험 응시 / 독자 프로젝트 대시보드 화면 완성</td>
+        </tr>
+        <tr>
+          <td>5주차</td>
+          <td>독자 프로젝트 JSON 기반 백업/복원 기능 구현 및 전체 예외 처리 마감</td>
+        </tr>
+
+        <!-- 9월 -->
+        <tr>
+          <td rowspan="4" style="vertical-align: middle; font-weight: 600;">9월</td>
+          <td>1주차</td>
+          <td>빅데이터 자격증 대비 기술 개요 정리 및 프론트엔드 React 구조 기본 독학 시작</td>
+        </tr>
+        <tr>
+          <td>2주차</td>
+          <td>Hadoop 및 분산 파일 시스템(HDFS) 구조 파악 및 React Hooks 핵심 실습</td>
+        </tr>
+        <tr>
+          <td>3주차</td>
+          <td>Apache Spark 분산 처리 기술 이해 및 방학 개발 프로젝트의 React 이식 개시</td>
+        </tr>
+        <tr>
+          <td>4주차</td>
+          <td>빅데이터 관련 문제 풀이 및 마감 / React 컴포넌트 최적화 및 렌더링 검증</td>
+        </tr>
+
+        <!-- 10월 -->
+        <tr>
+          <td rowspan="4" style="vertical-align: middle; font-weight: 600;">10월</td>
+          <td>1주차</td>
+          <td>완료된 AI 기반 주차장 관리 시스템 소스 코드 최종 검토 및 아카이빙</td>
+        </tr>
+        <tr>
+          <td>2주차</td>
+          <td>주차장 시스템 및 개인 프로젝트 데이터베이스 설계서(ERD) 고도화 시각화</td>
+        </tr>
+        <tr>
+          <td>3주차</td>
+          <td>GitHub 저장소별 README.md 문서화 (기술 스택 정리 및 트러블슈팅 내역 기술)</td>
+        </tr>
+        <tr>
+          <td>4주차</td>
+          <td>취업 준비용 포트폴리오(웹/PDF) 최종 구축 및 직무 맞춤형 이력서 작성</td>
+        </tr>
+
+        <!-- 11월 -->
+        <tr>
+          <td rowspan="4" style="vertical-align: middle; font-weight: 600;">11월</td>
+          <td>1주차</td>
+          <td>데이터 관리 및 솔솔루션 개발사 대상 리스트 분석 및 서류 지원 프로세스 개시</td>
+        </tr>
+        <tr>
+          <td>2주차</td>
+          <td>구직 플랫폼 기반 매칭 시스템 상시 지원 및 기술 면접 대비 CS 지식 집중 보완</td>
+        </tr>
+        <tr>
+          <td>3주차</td>
+          <td>지원 기업 면접 전형 참여 및 피드백 노트를 통한 실전 면접 답변 보완</td>
+        </tr>
+        <tr>
+          <td>4주차</td>
+          <td>최종 합격 및 실무 투입 일정 조율 / 전문 개발자로서의 현업 커리어 시작 준비 완료</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

@@ -91,7 +91,18 @@ function ck(bossId, diff) { return `${bossId}_${diff}`; }
 
 /* ── 결정석 ── */
 function countCrystals(ch) {
-  return Math.min(Object.values(ch.checks || {}).filter(v => v?.on).length, MAX_CRYSTALS_PP);
+  return Object.values(ch.checks || {}).filter(v => v?.on).length;
+}
+function countWeeklyCrystals(ch) {
+  // 월간 보스 제외 결정석 수
+  let n = 0;
+  Object.entries(ch.checks || {}).forEach(([key, v]) => {
+    if (!v?.on) return;
+    const bossId = key.slice(0, key.lastIndexOf('_'));
+    const boss = BOSS_DATA.find(b => b.id === bossId);
+    if (boss && !boss.monthly) n++;
+  });
+  return n;
 }
 /* 한 캐릭터의 주간 보스 수익 합 */
 function thursdaysInMonth() {
@@ -110,7 +121,7 @@ function charWeeklyMeso(ch) {
     const us = key.lastIndexOf('_');
     const bossId = key.slice(0, us), diff = key.slice(us + 1);
     const boss = BOSS_DATA.find(b => b.id === bossId);
-    if (!boss || !boss.diffs[diff]) return;
+    if (!boss || !boss.diffs[diff] || boss.monthly) return; // 월간 보스 제외
     sum += Math.floor(boss.diffs[diff] / (v.party || 1));
   });
   return sum;
@@ -214,8 +225,8 @@ function renderBossTable() {
   }
 
   const crystals = countCrystals(ch);
-  nm.textContent = `${ch.name} 보스 선택 (${crystals}/${MAX_CRYSTALS_PP})`;
-  cp.textContent = `결정석 ${crystals} / ${MAX_CRYSTALS_PP}`;
+  nm.textContent = `${ch.name} 보스 선택 (결정석 ${crystals}개)`;
+  cp.textContent = `결정석 ${crystals}개`;
 
   let total = 0;
   tb.innerHTML = '';
@@ -229,7 +240,6 @@ function renderBossTable() {
     const activeDiff = diffs.find(d => ch.checks?.[ck(boss.id, d)]?.on);
     if (activeDiff) { tr.classList.add('done'); }
 
-    // 난이도 버튼 (dpill)
     const pillsHtml = `<div class="diff-btns" data-boss="${boss.id}">
       ${diffs.map(d =>
         `<span class="dpill ${DIFF_META[d].cls} dpill--sm${activeDiff===d?' sel':''}" data-boss="${boss.id}" data-diff="${d}">
@@ -241,7 +251,7 @@ function renderBossTable() {
     const maxP  = activeDiff ? getMaxParty(boss, activeDiff) : 6;
     const party = activeDiff ? (ch.checks[ck(boss.id, activeDiff)]?.party ?? 1) : null;
     const price = activeDiff ? Math.floor(boss.diffs[activeDiff] / party) : null;
-    if (price) total += price;
+    if (price && !boss.monthly) total += price; // 월간 보스는 주간 합계 제외
 
     const partyHtml = !activeDiff
       ? '<span class="party-dash">-</span>'
@@ -266,11 +276,13 @@ function renderBossTable() {
     tb.appendChild(tr);
   });
 
-  document.getElementById('weeklyTotal').textContent = fmtMeso(total);
+  const wCost = rentalWeeklyCost();
+  const mCost = rentalMonthlyCost();
+  document.getElementById('weeklyTotal').textContent = fmtMeso(Math.max(0, total - wCost));
   const resets = thursdaysInMonth();
   const monthEl = document.getElementById('monthlyTotal');
   const monthSubEl = document.getElementById('monthResetCount');
-  if (monthEl) monthEl.textContent = fmtMeso(charMonthlyMeso(ch));
+  if (monthEl) monthEl.textContent = fmtMeso(Math.max(0, charMonthlyMeso(ch) - mCost));
   if (monthSubEl) monthSubEl.textContent = `(주${resets}회 기준)`;
 
   // 난이도 dpill 클릭 → 토글
@@ -284,10 +296,6 @@ function renderBossTable() {
       // 같은 보스 다른 난이도 해제
       Object.keys(boss.diffs).forEach(d => { ch.checks[ck(bossId,d)] = { on:false, party: ch.checks[ck(bossId,d)]?.party ?? 1 }; });
       if (!isActive) {
-        if (countCrystals(ch) >= MAX_CRYSTALS_PP) {
-          showToast(`보스 결정석은 최대 ${MAX_CRYSTALS_PP}개까지 판매 가능합니다.`);
-          save(); renderBossTable(); renderCharList(); return;
-        }
         if (state.chars.reduce((s,c)=>s+countCrystals(c),0) >= MAX_CRYSTALS) {
           showToast(`주간 결정석은 최대 ${MAX_CRYSTALS}개까지 판매 가능합니다.`);
           save(); renderBossTable(); renderCharList(); return;
@@ -314,6 +322,99 @@ function renderBossTable() {
     });
   });
 }
+
+/* ── 대여템 ── */
+const RENTAL_ITEMS = [
+  { id:'face',    img:'images/icons/Red_Beryl_Face_Accessory.png',   cost: 200_000_000 },
+  { id:'eye',     img:'images/icons/Red_Beryl_Eye_Accessory.png',    cost: 200_000_000 },
+  { id:'ear',     img:'images/icons/Red_Beryl_Earrings.png',         cost: 300_000_000 },
+  { id:'pendant', img:'images/icons/Red_Beryl_Pendant.png',          cost: 300_000_000 },
+  { id:'belt',    img:'images/icons/Red_Beryl_Belt.png',             cost: 300_000_000 },
+  { id:'ror',     img:'images/icons/Finite_Red_Beryl_Ring(RoR).png', cost: 100_000_000 },
+  { id:'cr',      img:'images/icons/Finite_Red_Beryl_Ring(CR).png',  cost: 100_000_000 },
+  { id:'arthur',  img:'images/icons/Arthur_Totem.png',               cost: 100_000_000 },
+  { id:'flash',   img:'images/icons/Flash_Totem.png',                cost: 100_000_000 },
+  { id:'beryl',   img:'images/icons/Red_Beryl_Totem.png',            cost: 100_000_000 },
+];
+
+function getRentalState() {
+  try { return JSON.parse(localStorage.getItem('rental') || '{"slots":[],"wed":false}'); }
+  catch { return { slots: [], wed: false }; }
+}
+function saveRentalState(s) { localStorage.setItem('rental', JSON.stringify(s)); }
+
+function rentalWeeklyCost() {
+  const s = getRentalState();
+  return RENTAL_ITEMS.reduce((t, item, i) => t + (s.slots.includes(item.id) ? item.cost : 0), 0);
+}
+function rentalMonthlyCost() {
+  const s = getRentalState();
+  const weekly = rentalWeeklyCost();
+  return weekly * (s.wed ? 2 : 4);
+}
+
+function initRentalSlots() {
+  const container = document.getElementById('rentalSlots');
+  if (!container) return;
+  const s = getRentalState();
+  container.innerHTML = '';
+  RENTAL_ITEMS.forEach(item => {
+    const slot = document.createElement('div');
+    slot.className = 'rental-slot' + (s.slots.includes(item.id) ? ' on' : '');
+    slot.dataset.id = item.id;
+    slot.innerHTML = `<img src="${item.img}" alt="${item.id}" onerror="this.style.opacity='.3'">`;
+    slot.addEventListener('click', () => {
+      const rs = getRentalState();
+      const idx = rs.slots.indexOf(item.id);
+      if (idx >= 0) rs.slots.splice(idx, 1); else rs.slots.push(item.id);
+      saveRentalState(rs);
+      initRentalSlots();
+      updateRentalTotals();
+    });
+    container.appendChild(slot);
+  });
+  updateRentalTotals();
+}
+
+function updateRentalTotals() {
+  const wCost = rentalWeeklyCost();
+  const label = document.getElementById('rentalCostLabel');
+  if (label) label.textContent = wCost > 0 ? `-${fmtMeso(wCost)}` : '';
+
+  const ch = state.chars[state.activeChar];
+  if (!ch) return;
+  let bossWeekly = 0;
+  (ch.checks ? Object.entries(ch.checks) : []).forEach(([key, val]) => {
+    if (!val?.on) return;
+    const sep = key.lastIndexOf('_');
+    const bossId = key.slice(0, sep);
+    const diff   = key.slice(sep + 1);
+    const boss = BOSS_DATA.find(b => b.id === bossId);
+    if (!boss || boss.monthly) return;
+    bossWeekly += Math.floor((boss.diffs[diff] || 0) / Math.max(1, val.party || 1));
+  });
+  const wEl = document.getElementById('weeklyTotal');
+  const mEl = document.getElementById('monthlyTotal');
+  const wCost2 = rentalWeeklyCost();
+  const mCost2 = rentalMonthlyCost();
+  if (wEl) wEl.textContent = fmtMeso(Math.max(0, bossWeekly - wCost2));
+  if (mEl) mEl.textContent = fmtMeso(Math.max(0, charMonthlyMeso(ch) - mCost2));
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initRentalSlots();
+  const wedCb = document.getElementById('rentalWed');
+  if (wedCb) {
+    const s = getRentalState();
+    wedCb.checked = s.wed;
+    wedCb.addEventListener('change', () => {
+      const rs = getRentalState();
+      rs.wed = wedCb.checked;
+      saveRentalState(rs);
+      updateRentalTotals();
+    });
+  }
+});
 
 /* ── 보스 초기화 ── */
 document.getElementById('btnResetBoss').addEventListener('click', () => {
@@ -570,6 +671,33 @@ document.getElementById('charList').addEventListener('click', e => {
 document.querySelectorAll('.overlay').forEach(ov => {
   ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
 });
+
+/* ── 커서 ON/OFF 토글 ── */
+(function() {
+  const btn = document.getElementById('btnCursor');
+  const cur = document.getElementById('customCursor');
+  const styleEl = document.createElement('style');
+  document.head.appendChild(styleEl);
+
+  let cursorOn = true;
+
+  function applyCursor() {
+    if (cursorOn) {
+      styleEl.textContent = '';
+      if (cur) cur.style.display = 'block';
+      btn.textContent = 'ON';
+      btn.classList.add('hbtn--cursor-on');
+    } else {
+      styleEl.textContent = '*, *:hover, *:active, *:focus { cursor: auto !important; }';
+      if (cur) cur.style.display = 'none';
+      btn.textContent = 'OFF';
+      btn.classList.remove('hbtn--cursor-on');
+    }
+  }
+
+  btn.addEventListener('click', () => { cursorOn = !cursorOn; applyCursor(); });
+  applyCursor();
+})();
 
 /* ── 내보내기 / 불러오기 ── */
 document.getElementById('btnExport').addEventListener('click', () => {

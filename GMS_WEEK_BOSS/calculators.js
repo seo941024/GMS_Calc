@@ -22,7 +22,7 @@ let hxSkill = (() => {
 })();
 let hxMastery = _hxLoad('hx_mastery', ['마스터리 1','마스터리 2','마스터리 3','마스터리 4'], 30);
 let hxBoost   = _hxLoad('hx_boost',   ['부스트 1','부스트 2','부스트 3','부스트 4'], 30);
-let hxCommon  = _hxLoad('hx_common',  ['Sol Janus', 'Sol Hecate'], 30);
+let hxCommon  = _hxLoad('hx_common',  ['솔 야누스', '솔 헤카테'], 30);
 
 function renderNodeList(nodes, containerId, storageKey, icons=[]) {
   const list = document.getElementById(containerId);
@@ -53,7 +53,7 @@ function renderNodeList(nodes, containerId, storageKey, icons=[]) {
 function renderAllHexaLists() {
   const ch  = typeof state !== 'undefined' ? state.chars[state.activeChar] : null;
   const job = ch?.fetched?.job || (typeof JOB_LIST !== 'undefined' && JOB_LIST[ch?.jobIdx]?.name) || '';
-  const jd  = (typeof HEXA_JOB_DATA !== 'undefined' && HEXA_JOB_DATA[job]) || (typeof HEXA_DEFAULT_DATA !== 'undefined' ? HEXA_DEFAULT_DATA : { folder:null, skill:['스킬 노드 1','스킬 노드 2'], mastery:['마스터리 1','마스터리 2','마스터리 3','마스터리 4'], boost:['부스트 1','부스트 2','부스트 3','부스트 4'], common:['Sol Janus','Sol Hecate'] });
+  const jd  = (typeof HEXA_JOB_DATA !== 'undefined' && HEXA_JOB_DATA[job]) || (typeof HEXA_DEFAULT_DATA !== 'undefined' ? HEXA_DEFAULT_DATA : { folder:null, skill:['스킬 노드 1','스킬 노드 2'], mastery:['마스터리 1','마스터리 2','마스터리 3','마스터리 4'], boost:['부스트 1','부스트 2','부스트 3','부스트 4'], common:['솔 야누스','솔 헤카테'] });
 
   const ico = (n) => jd.folder ? `images/skill/${jd.folder}/${n}.webp` : null;
   const commonIco = ['images/skill/Common/sol_janus.webp', 'images/skill/Common/sol_hecate.webp'];
@@ -87,24 +87,48 @@ document.getElementById('hxCalc').addEventListener('click', () => {
   addNodes(hxBoost,   HEXA_BOOST_COSTS);
   addNodes(hxCommon,  HEXA_COMMON_COSTS);
 
-  const needTotal = needSE => needSE * 100 + totalSEF;
+  // 전체 통계 (0→max, 0→cur, cur→max)
+  let totalAllSE = 0, totalAllSEF = 0;
+  let usedSE = 0, usedSEF = 0;
+  let remainSE = 0, remainSEF = 0;
+  function addStats(nodes, costTable) {
+    nodes.forEach(sk => {
+      const cur = Math.max(0, Math.min(sk.max, sk.cur));
+      { const r = hexaCumulative(costTable, 0, sk.max); totalAllSE += r.se; totalAllSEF += r.sef; }
+      { const r = hexaCumulative(costTable, 0, cur);    usedSE   += r.se; usedSEF   += r.sef; }
+      { const r = hexaCumulative(costTable, cur, sk.max); remainSE += r.se; remainSEF += r.sef; }
+    });
+  }
+  addStats(hxSkill,   HEXA_SKILL_COSTS);
+  addStats(hxMastery, HEXA_MASTERY_COSTS);
+  addStats(hxBoost,   HEXA_BOOST_COSTS);
+  addStats(hxCommon,  HEXA_COMMON_COSTS);
+
   const enough  = haveSE >= totalSE;
   const enoughF = haveSEF >= totalSEF;
   const res = document.getElementById('hxResult');
   const SE_ICON  = `<img src="images/skill/Common/sol_erda.webp"  class="hx-res-icon" alt="">`;
   const SEF_ICON = `<img src="images/skill/Common/fragment.webp" class="hx-res-icon" alt="">`;
   res.innerHTML = `
+    <div class="hexa-result-row"><span class="rl">총 요구 솔 에르다</span><span class="rv">${SE_ICON}${totalAllSE.toLocaleString()} 개</span></div>
+    <div class="hexa-result-row"><span class="rl">총 요구 솔 에르다 조각</span><span class="rv">${SEF_ICON}${totalAllSEF.toLocaleString()} 개</span></div>
+    <div class="hexa-result-row" style="margin-top:6px"><span class="rl">이미 사용한 솔 에르다</span><span class="rv">${SE_ICON}${usedSE.toLocaleString()} 개</span></div>
+    <div class="hexa-result-row"><span class="rl">이미 사용한 솔 에르다 조각</span><span class="rv">${SEF_ICON}${usedSEF.toLocaleString()} 개</span></div>
+    <div class="hexa-result-row" style="margin-top:6px"><span class="rl">만렙까지 남은 솔 에르다</span><span class="rv">${SE_ICON}${remainSE.toLocaleString()} 개</span></div>
+    <div class="hexa-result-row"><span class="rl">만렙까지 남은 솔 에르다 조각</span><span class="rv">${SEF_ICON}${remainSEF.toLocaleString()} 개</span></div>
+    <div class="hx-result-sep"></div>
+    <div class="hexa-result-label">필요량 계산 결과</div>
     <div class="hexa-result-row"><span class="rl">필요 솔 에르다</span><span class="rv">${SE_ICON}${totalSE.toLocaleString()} 개</span></div>
     <div class="hexa-result-row"><span class="rl">필요 솔 에르다 조각</span><span class="rv">${SEF_ICON}${totalSEF.toLocaleString()} 개</span></div>
     <div class="hexa-result-row"><span class="rl">보유 솔 에르다</span><span class="rv">${SE_ICON}${haveSE.toLocaleString()} 개</span></div>
     <div class="hexa-result-row"><span class="rl">보유 솔 에르다 조각</span><span class="rv">${SEF_ICON}${haveSEF.toLocaleString()} 개</span></div>
-    <div class="hexa-result-row" style="margin-top:8px;padding-top:8px;border-top:2px solid var(--border)">
+    <div class="hexa-result-row" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
       <span class="rl">솔 에르다 부족량</span>
-      <span class="rv ${enough?'hp-suf':'ng'}">${enough?'요구량 충족':(totalSE-haveSE)+' 개 부족'}</span>
+      <span class="rv ${enough?'hp-suf':'ng'}">${enough?'요구량 충족':(totalSE-haveSE).toLocaleString()+' 개 부족'}</span>
     </div>
     <div class="hexa-result-row">
       <span class="rl">솔 에르다 조각 부족량</span>
-      <span class="rv ${enoughF?'hp-suf':'ng'}">${enoughF?'요구량 충족':(totalSEF-haveSEF)+' 개 부족'}</span>
+      <span class="rv ${enoughF?'hp-suf':'ng'}">${enoughF?'요구량 충족':(totalSEF-haveSEF).toLocaleString()+' 개 부족'}</span>
     </div>
     <div style="margin-top:10px;font-size:.75rem;color:var(--text-sub);line-height:1.6">
       ※ 비용은 근삿값입니다. 실제 게임과 차이가 있을 수 있습니다.
@@ -116,8 +140,15 @@ renderAllHexaLists();
 /* ═══════════════════════════════════════════════
    해방 계산기 — 제네시스 (어둠의 흔적)
 ═══════════════════════════════════════════════ */
+function nextThursday(from) {
+  const d = new Date(from || new Date());
+  const diff = (4 - d.getDay() + 7) % 7;
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().slice(0, 10);
+}
+
 const genState = (() => {
-  const def = { quest:0, held:0, pass:false, party:1, sel:{} };
+  const def = { quest:0, held:0, pass:false, party:1, sel:{}, startDate: nextThursday() };
   try { return Object.assign(def, JSON.parse(localStorage.getItem('lib_genesis_v2') || '{}')); }
   catch { return def; }
 })();
@@ -168,9 +199,14 @@ function renderGenesis() {
   const toNext = nextQ ? Math.max(0, nextQ.cum - held) : 0;
 
   const clearedCount = Object.values(genState.sel).filter(s => s && s.on).length;
+  const startDate = genState.startDate || nextThursday();
   const targetDate = (() => {
     if (!isFinite(weeksLeft)) return '—';
-    const d = new Date(); d.setDate(d.getDate() + weeksLeft * 7);
+    // 시작일이 목요일 이전이면(화/수) 해당 주 목요일로 스냅 → 같은 주 시작은 같은 날 해방
+    const d = new Date(startDate);
+    const daysToThu = (4 - d.getDay() + 7) % 7;
+    d.setDate(d.getDate() + daysToThu);        // 이번 주 목요일
+    d.setDate(d.getDate() + weeksLeft * 7);    // N주 후 목요일
     return `${d.getFullYear()}. ${String(d.getMonth()+1).padStart(2,'0')}. ${String(d.getDate()).padStart(2,'0')}.`;
   })();
 
@@ -199,16 +235,21 @@ function renderGenesis() {
     return `
       <div class="gen-boss ${sel.on?'on':''}" data-id="${id}">
         <div class="boss-thumb"><img src="${info.img}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><span class="noimg" style="display:none">BOSS</span></div>
-        <div class="gen-boss__main">
-          <div class="gen-boss__name">${info.name}${id==='blackmage'?'<span class="boss-monthly">월간</span>':''}</div>
+        <div class="gen-boss__body">
+          <div class="gen-boss__top">
+            <span class="gen-boss__name">${info.name}</span>
+            ${id==='blackmage'?'<span class="boss-monthly">월간</span>':''}
+          </div>
           <select class="sel gen-boss__diff" data-id="${id}">${diffOpts}</select>
+          <div class="gen-boss__btm">
+            <div class="party-stepper gen-boss__party" data-id="${id}">
+              <button class="pm" ${party<=1?'disabled':''}>−</button>
+              <span class="party-stepper__val">${party}</span>
+              <button class="pp" ${party>=6?'disabled':''}>+</button>
+            </div>
+            <button class="gen-boss__toggle ${sel.on?'on':''}" data-id="${id}">${sel.on?'격파':'미격파'}</button>
+          </div>
         </div>
-        <div class="party-stepper gen-boss__party" data-id="${id}">
-          <button class="pm" ${party<=1?'disabled':''}>−</button>
-          <span class="party-stepper__val">${party}</span>
-          <button class="pp" ${party>=6?'disabled':''}>+</button>
-        </div>
-        <button class="gen-boss__toggle ${sel.on?'on':''}" data-id="${id}">${sel.on?'격파':'미격파'}</button>
       </div>`;
   }).join('');
 
@@ -216,12 +257,12 @@ function renderGenesis() {
     <div class="gen-grid">
       <div class="card gen-progress">
         <div class="card__title">해방 진행도</div>
-        <div class="gen-date">${targetDate}</div>
-        <div class="gen-date__sub">예상 해방일 (${isFinite(weeksLeft)?weeksLeft+'주':'—'})</div>
-        <div class="gen-prog-row"><span>보유 흔적</span><span>${fmtTrace(held)}</span></div>
-        <div class="lib-progress"><div class="lib-progress__fill" style="width:${pct}%"></div></div>
-        <div class="lib-pct">${pct}% · 남은 흔적 ${fmtTrace(remaining)}</div>
-        <div class="gen-quest-now">현재 퀘스트: <b>${q.name}</b> · 소모 ${fmtTrace(consume)} 흔적<br><span class="gen-quest-next">${nextLabel}${nextQ?` · ${fmtTrace(toNext)} 남음`:''}</span></div>
+        <div class="lib-progress" style="margin-bottom:6px"><div class="lib-progress__fill" style="width:${pct}%"></div></div>
+        <div class="lib-pct">${pct}% · ${fmtTrace(held)} / ${fmtTrace(GENESIS_TARGET)} 흔적</div>
+        <div class="gen-stat-row"><span>남은 흔적</span><b>${fmtTrace(remaining)}</b></div>
+        <div class="gen-stat-row"><span>예상 해방 기간</span><b>${isFinite(weeksLeft)?weeksLeft+'주 후':'—'}</b></div>
+        <div class="gen-stat-row accent"><span>예상 해방 날짜</span><b>${targetDate}</b></div>
+        <div class="gen-quest-now" style="margin-top:10px">현재 퀘스트: <b>${q.name}</b> · 소모 ${fmtTrace(consume)} 흔적<br><span class="gen-quest-next">${nextLabel}${nextQ?` · ${fmtTrace(toNext)} 남음`:''}</span></div>
       </div>
 
       <div class="card gen-sources">
@@ -232,16 +273,34 @@ function renderGenesis() {
       </div>
     </div>
 
-    <div class="card">
-      <div class="card__title">설정</div>
-      <div class="gen-config">
-        <div class="field">
-          <label class="field__label">보유 어둠의 흔적</label>
-          <input class="inp" id="genHeld" type="number" min="0" max="${TRACE_HOLD_MAX}" value="${held}" />
+    <div class="gen-cfg-wrap">
+      <div class="gen-cfg-card">
+        <img class="gen-cfg-card__img" src="images/icons/Trace_of_darkness.webp" alt="어둠의 흔적">
+        <div class="gen-cfg-card__body">
+          <div class="gen-cfg-card__title">어둠의 흔적</div>
+          <div class="gen-cfg-card__fields">
+            <div class="field">
+              <label class="field__label">보유 수량</label>
+              <input class="inp" id="genHeld" type="number" min="0" max="${TRACE_HOLD_MAX}" value="${held}" />
+            </div>
+            <div class="field">
+              <label class="field__label">시작일 <span style="font-size:.7rem;font-weight:400;color:var(--text-dim)">(목요일 기준)</span></label>
+              <input class="inp" id="genStartDate" type="date" value="${startDate}" />
+            </div>
+          </div>
         </div>
-        <div class="field">
-          <label class="field__label">제네시스 패스</label>
-          <label class="gen-switch"><input type="checkbox" id="genPass" ${genState.pass?'checked':''} /> <span>사용 ${genState.pass?'ON':'OFF'}</span></label>
+      </div>
+
+      <div class="gen-cfg-card gen-cfg-card--pass${genState.pass?' on':''}">
+        <img class="gen-cfg-card__img" src="images/icons/Genesis.png" alt="제네시스 패스">
+        <div class="gen-cfg-card__body">
+          <div class="gen-cfg-card__title">제네시스 패스</div>
+          <div class="gen-cfg-card__desc">활성화 시 흔적 획득량 <b>×3</b></div>
+          <label class="gen-switch gen-pass-toggle">
+            <input type="checkbox" id="genPass" ${genState.pass?'checked':''} />
+            <span class="gen-switch__track"><span class="gen-switch__thumb"></span></span>
+            <span class="gen-switch__label">${genState.pass?'ON · 적용 중':'OFF'}</span>
+          </label>
         </div>
       </div>
     </div>
@@ -263,6 +322,9 @@ function renderGenesis() {
   });
   document.getElementById('genPass').addEventListener('change', e => {
     genState.pass = e.target.checked; saveGen(); renderGenesis();
+  });
+  document.getElementById('genStartDate').addEventListener('change', e => {
+    genState.startDate = e.target.value || nextThursday(); saveGen(); renderGenesis();
   });
   panel.querySelectorAll('.gen-boss__party').forEach(ps => {
     const id = ps.dataset.id;
@@ -443,14 +505,6 @@ function renderBossHPTable() {
   BOSS_DATA.forEach(bd => {
     const key = Object.keys(seen).find(k => norm(k) === norm(bd.name));
     if (key) { seen[key].img = bd.img; seen[key].monthly = !!bd.monthly; }
-  });
-
-  // 월간보스 맨 뒤, 그 외 레벨 내림차순
-  groups.sort((a, b) => {
-    if (a.monthly !== b.monthly) return (a.monthly ? 1 : 0) - (b.monthly ? 1 : 0);
-    const aLv = Math.max(...a.diffs.map(d => d.lv || 0));
-    const bLv = Math.max(...b.diffs.map(d => d.lv || 0));
-    return bLv - aLv;
   });
 
   const container = document.getElementById('bossHPCards');

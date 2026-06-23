@@ -35,31 +35,51 @@ const NEXON_BASE = 'https://www.nexon.com/api/maplestory/no-auth/ranking/v2';
 /* ── 캐릭터 랭킹 조회 (서버사이드 스크래핑/프록시) ── */
 async function lookupCharacter(name, reboot, region) {
   const reg = region === 'eu' ? 'eu' : 'na';
-  const url = `${NEXON_BASE}/${reg}?type=overall&id=weekly&reboot_index=${reboot ? 1 : 0}`
-            + `&page_index=1&character_name=${encodeURIComponent(name)}`;
-  const r = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' },
-  });
+  const headers = { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' };
+  const lc = name.toLowerCase();
+
+  // 1) overall 랭킹
+  const overallUrl = `${NEXON_BASE}/${reg}?type=overall&id=weekly&reboot_index=${reboot ? 1 : 0}`
+                   + `&page_index=1&character_name=${encodeURIComponent(name)}`;
+  const r = await fetch(overallUrl, { headers });
   if (!r.ok) throw new Error('Nexon 응답 오류 ' + r.status);
   const data = await r.json();
   if (!data.ranks || data.ranks.length === 0) return null;
-
-  // 정확히 일치하는 캐릭터 우선, 없으면 첫 결과
-  const lc = name.toLowerCase();
   const hit = data.ranks.find(c => (c.characterName||'').toLowerCase() === lc) || data.ranks[0];
 
+  // 2) legion 랭킹 (유니온 레벨·전투력·랭킹) — 실패해도 무시
+  let legionLevel = hit.legionLevel || 0;
+  let legionPower = 0;
+  let legionRank  = 0;
+  try {
+    const legionUrl = `${NEXON_BASE}/${reg}?type=legion&id=weekly&reboot_index=0`
+                    + `&page_index=1&character_name=${encodeURIComponent(name)}`;
+    const lr = await fetch(legionUrl, { headers });
+    if (lr.ok) {
+      const ld = await lr.json();
+      const lhit = (ld.ranks || []).find(c => (c.characterName||'').toLowerCase() === lc);
+      if (lhit) {
+        legionLevel = lhit.legionLevel || lhit.legion_level || lhit.unionLevel || legionLevel;
+        legionPower = lhit.legionPower || lhit.legionCombatPower || lhit.legion_power || lhit.unionPower || lhit.combatPower || 0;
+        legionRank  = lhit.rank || lhit.legionRank || 0;
+      }
+    }
+  } catch (_) {}
+
   return {
-    name:   hit.characterName,
-    level:  hit.level,
-    exp:    hit.exp,
-    job:    hit.jobName,
-    world:  worldName(hit.worldID),
-    worldID: hit.worldID,
-    rank:   hit.rank,
-    legion: hit.legionLevel || 0,
-    img:    hit.characterImgURL || '',
-    reboot: !!reboot,
-    region: region === 'eu' ? 'EU' : 'NA',
+    name:        hit.characterName,
+    level:       hit.level,
+    exp:         hit.exp,
+    job:         hit.jobName,
+    world:       worldName(hit.worldID),
+    worldID:     hit.worldID,
+    rank:        hit.rank,
+    legion:      legionLevel,
+    legionPower: legionPower,
+    legionRank:  legionRank,
+    img:         hit.characterImgURL || '',
+    reboot:      !!reboot,
+    region:      region === 'eu' ? 'EU' : 'NA',
   };
 }
 

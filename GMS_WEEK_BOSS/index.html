@@ -24,6 +24,7 @@
       <option value="Maple">Maple</option>
       <option value="8bit">8bit</option>
     </select>
+    <button class="hbtn hbtn--cursor" id="btnCursor" title="마우스 커서 ON/OFF">🖱 ON</button>
     <button class="hbtn" id="btnExport">내보내기</button>
     <button class="hbtn" id="btnImport">불러오기</button>
     <input type="file" id="fileImport" accept=".json" style="display:none" />
@@ -70,7 +71,7 @@
         <img class="sb-nav__icon" src="images/icons/info.webp" alt="" onerror="this.style.display='none'"><span>캐릭터 정보</span>
       </button>
       <button class="sb-nav__item" data-sec="boss">
-        <img class="sb-nav__icon" src="images/icons/weekly.webp" alt=""><span>주간보스 수익 계산기</span>
+        <img class="sb-nav__icon" src="images/icons/weekly.webp" alt=""><span>보스 수익 계산기</span>
       </button>
       <button class="sb-nav__item" data-sec="hexa">
         <img class="sb-nav__icon" src="images/icons/fragment.webp" alt=""><span>헥사 계산기</span>
@@ -79,7 +80,7 @@
         <img class="sb-nav__icon" src="images/icons/Destiny.webp" alt=""><span>해방 계산기</span>
       </button>
       <button class="sb-nav__item" data-sec="starforce">
-        <img class="sb-nav__icon" src="images/icons/mose.webp" alt="" onerror="this.style.display='none'"><span>스타포스 시뮬레이터</span>
+        <img class="sb-nav__icon" src="images/icons/meso.webp" alt="" onerror="this.style.display='none'"><span>스타포스 시뮬레이터</span>
       </button>
       <button class="sb-nav__item" data-sec="bosshp">
         <img class="sb-nav__icon" src="images/icons/boss.webp" alt="" onerror="this.style.display='none'"><span>보스 HP 테이블</span>
@@ -112,6 +113,21 @@
             <tbody id="bossTableBody"></tbody>
           </table>
         </div>
+        <!-- 대여템 섹션 -->
+        <div class="rental-section">
+          <div class="rental-header">
+            <span class="rental-title">아이템 대여</span>
+            <span class="rental-cost-label" id="rentalCostLabel"></span>
+          </div>
+          <div class="rental-slots" id="rentalSlots"></div>
+          <div class="rental-footer">
+            <label class="rental-wed-label">
+              <input type="checkbox" id="rentalWed" />
+              수요일 대여 : 1회 대여 후 2주치 격파
+            </label>
+            <span class="rental-notice">(수요일 대여 체크 시, 주간 결산보다 월말 결산이 정확합니다)</span>
+          </div>
+        </div>
         <div class="boss-total">
           <span class="boss-total__label">이번 주 예상 수익</span>
           <span class="boss-total__val" id="weeklyTotal">0 메소</span>
@@ -142,16 +158,16 @@
             </div>
           </div>
 
-          <div class="card__title mt16">스킬 코어 (최대 Lv.30)</div>
+          <div class="card__title mt16">스킬 코어</div>
           <div id="hxSkillList" class="hexa-support-list"></div>
 
-          <div class="card__title mt16">마스터리 코어 (최대 Lv.30)</div>
+          <div class="card__title mt16">마스터리 코어</div>
           <div id="hxMasteryList" class="hexa-support-list"></div>
 
-          <div class="card__title mt16">강화 코어 (최대 Lv.30)</div>
+          <div class="card__title mt16">강화 코어</div>
           <div id="hxBoostList" class="hexa-support-list"></div>
 
-          <div class="card__title mt16">공용 코어 (최대 Lv.30)</div>
+          <div class="card__title mt16">공용 코어</div>
           <div id="hxCommonList" class="hexa-support-list"></div>
 
           <button class="sbtn sbtn--primary mt16 w100" id="hxCalc">계산하기</button>
@@ -172,8 +188,8 @@
       <div class="sec-head"><h2 class="sec-title">무기 해방 계산기</h2><span class="sec-badge">근삿값</span></div>
 
       <div class="lib-tabs">
-        <button class="lib-tab active" data-lib="genesis">제네시스 해방</button>
-        <button class="lib-tab" data-lib="destiny">데스티니 해방</button>
+        <button class="lib-tab active" data-lib="genesis"><img src="images/icons/Jenesis.png" class="lib-tab__icon" alt="">제네시스 해방</button>
+        <button class="lib-tab" data-lib="destiny"><img src="images/icons/Destiny.webp" class="lib-tab__icon" alt="">데스티니 해방</button>
       </div>
 
       <div id="lib-genesis" class="lib-panel active"></div>
