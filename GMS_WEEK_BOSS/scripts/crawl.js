@@ -18,10 +18,7 @@ const WORLD_TYPES = ['both', 'heroic'];
 const REGION_CODE = { 'north-america': 'na', 'europe': 'eu' };
 const REBOOT_CODE = { 'heroic': 1, 'both': 0, 'interactive': 0 };
 
-CSS/JS 파일들만 보이고 실제 테이블 데이터가 없어요. Vue.js가 렌더링을 완료하기 전에 긁는 거예요.
-5초 대기로도 부족한 거니까 테이블이 실제로 나타날 때까지 기다려야 해요. 이렇게 바꿔줘요:
-scrapePage 함수 전체를 이걸로 교체해줘요:
-javascriptasync function scrapePage(page, url) {
+async function scrapePage(page, url) {
   await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
 
   // 실제 데이터 셀이 나올 때까지 최대 30초 대기
