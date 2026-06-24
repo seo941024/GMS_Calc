@@ -2,9 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": null,
   "outputDirectory": ".",
-  "functions": {
-    "api/*.js": { "runtime": "nodejs20.x" }
-  },
   "crons": [
     { "path": "/api/collect", "schedule": "0 0 * * *" }
   ]
