@@ -10,10 +10,10 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
-const BASE = 'https://www.nexon.net/maplestory/rankings';
+const BASE = 'https://www.nexon.com/maplestory/rankings';
 const REGIONS = ['north-america', 'europe'];
 const TYPES = ['overall', 'job', 'legion'];
-const WORLD_TYPES = ['heroic', 'interactive']; // heroic=리부트, interactive=일반
+const WORLD_TYPES = ['both', 'heroic'];
 
 const REGION_CODE = { 'north-america': 'na', 'europe': 'eu' };
 const REBOOT_CODE = { 'heroic': 1, 'interactive': 0 };
