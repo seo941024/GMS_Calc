@@ -12,7 +12,7 @@ const HEADERS = { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' };
 async function fetchPage(reg, type, reboot, page) {
   try {
     const url = `${NEXON_BASE}/${reg}?type=${type}&id=weekly&reboot_index=${reboot}&page_index=${page}`;
-    const r = await fetch(url, { headers: HEADERS });
+    const r = await fetch(url, { headers: HEADERS, signal: AbortSignal.timeout(8000) });
     if (!r.ok) return [];
     const d = await r.json();
     return d.ranks || [];
@@ -20,7 +20,7 @@ async function fetchPage(reg, type, reboot, page) {
 }
 
 // 한 타입 전체 크롤 (최대 maxPages 페이지, 동시 concurrency개)
-async function crawlType(reg, type, reboot, maxPages = 200, concurrency = 15) {
+async function crawlType(reg, type, reboot, maxPages = 200, concurrency = 10) {
   const result = {};
   for (let start = 1; start <= maxPages; start += concurrency) {
     const pages = [];
@@ -36,7 +36,7 @@ async function crawlType(reg, type, reboot, maxPages = 200, concurrency = 15) {
         if (!key) continue;
         result[key] = result[key] || {};
         if (type === 'world')  result[key].worldRank    = c.rank;
-        if (type === 'job')    result[key].jobRankWorld = c.rank;
+        if (type === 'job')    result[key].jobRankWorld  = c.rank;
         if (type === 'legion') {
           result[key].legionRank  = c.rank;
           result[key].legionLevel = c.legionLevel || c.unionLevel || 0;
@@ -63,18 +63,32 @@ function merge(base, patch) {
   return base;
 }
 
+// Redis 파이프라인 안전 실행 (비어있으면 스킵)
+async function safeExec(pipe) {
+  if (!pipe || pipe.length === 0) return [];
+  return await pipe.exec();
+}
+
 module.exports = async function handler(req, res) {
   const secret = process.env.CRON_SECRET;
   if (secret) {
     const auth = req.headers['authorization'] || '';
-    if (auth !== `Bearer ${secret}`) { res.status(401).json({ ok: false, error: 'unauthorized' }); return; }
+    if (auth !== `Bearer ${secret}`) {
+      res.status(401).json({ ok: false, error: 'unauthorized' });
+      return;
+    }
   }
 
   const redis = getRedis();
-  if (!redis) { res.status(500).json({ ok: false, error: 'Redis 미설정' }); return; }
+  if (!redis) {
+    res.status(500).json({ ok: false, error: 'Redis 미설정' });
+    return;
+  }
 
   // ── 1) 랭킹 크롤링 ──
   const MAX = 300; // 페이지당 100명 × 300 = 30,000명
+
+  console.log('[collect] 랭킹 크롤링 시작');
 
   const [naWorld0, naWorld1, naJob0, naJob1, naLegion,
          euWorld0, euWorld1, euJob0,  euJob1,  euLegion] = await Promise.all([
@@ -90,29 +104,48 @@ module.exports = async function handler(req, res) {
     crawlType('eu', 'legion', 0, MAX),
   ]);
 
-  const naData = {}; merge(naData, naWorld0); merge(naData, naWorld1);
-  merge(naData, naJob0); merge(naData, naJob1); merge(naData, naLegion);
-  const euData = {}; merge(euData, euWorld0); merge(euData, euWorld1);
-  merge(euData, euJob0); merge(euData, euJob1); merge(euData, euLegion);
+  const naData = {};
+  merge(naData, naWorld0); merge(naData, naWorld1);
+  merge(naData, naJob0);   merge(naData, naJob1);
+  merge(naData, naLegion);
 
-  // Redis에 저장 (파이프라인으로 한 번에)
-  const pipe = redis.pipeline();
+  const euData = {};
+  merge(euData, euWorld0); merge(euData, euWorld1);
+  merge(euData, euJob0);   merge(euData, euJob1);
+  merge(euData, euLegion);
+
+  console.log(`[collect] naData: ${Object.keys(naData).length}명, euData: ${Object.keys(euData).length}명`);
+
+  // ✅ Redis에 저장 (파이프라인 — 비어있으면 안전하게 스킵)
   const ts = Date.now();
-  for (const [name, data] of Object.entries(naData)) {
-    pipe.set(`rnk:na:${name}`, JSON.stringify({ ...data, ts }), { ex: 60 * 60 * 25 }); // 25시간 TTL
+  const naKeys = Object.entries(naData);
+  const euKeys = Object.entries(euData);
+
+  if (naKeys.length > 0 || euKeys.length > 0) {
+    const pipe = redis.pipeline();
+    for (const [name, data] of naKeys) {
+      pipe.set(`rnk:na:${name}`, JSON.stringify({ ...data, ts }), { ex: 60 * 60 * 25 });
+    }
+    for (const [name, data] of euKeys) {
+      pipe.set(`rnk:eu:${name}`, JSON.stringify({ ...data, ts }), { ex: 60 * 60 * 25 });
+    }
+    await safeExec(pipe);
+    console.log(`[collect] Redis 저장 완료 (na: ${naKeys.length}, eu: ${euKeys.length})`);
+  } else {
+    console.warn('[collect] 경고: 크롤링 결과가 없어 Redis 저장 스킵');
   }
-  for (const [name, data] of Object.entries(euData)) {
-    pipe.set(`rnk:eu:${name}`, JSON.stringify({ ...data, ts }), { ex: 60 * 60 * 25 });
-  }
-  await pipe.exec();
 
   // ── 2) 추적 캐릭터 exp 스냅샷 ──
   let tracked = [];
-  try { tracked = await redis.smembers('tracked') || []; } catch { /* 무시 */ }
+  try {
+    tracked = await redis.smembers('tracked') || [];
+  } catch (e) {
+    console.error('[collect] tracked 로드 실패:', e.message);
+  }
 
   let ok = 0, fail = 0;
   for (const entry of tracked) {
-    const parts = String(entry).split('|');
+    const parts  = String(entry).split('|');
     const region = parts[1] || 'na';
     const reboot = parts[2] === '1';
     const name   = parts.slice(3).join('|');
@@ -124,13 +157,21 @@ module.exports = async function handler(req, res) {
           exp: Number(info.exp) || 0, img: info.img || '', job: info.job || '',
         });
         ok++;
-      } else fail++;
-    } catch { fail++; }
+      } else {
+        fail++;
+      }
+    } catch (e) {
+      console.error(`[collect] 스냅샷 실패 (${name}):`, e.message);
+      fail++;
+    }
   }
+
+  console.log(`[collect] 스냅샷 완료 — ok: ${ok}, fail: ${fail}`);
 
   res.status(200).json({
     ok: true,
-    ranked: { na: Object.keys(naData).length, eu: Object.keys(euData).length },
-    collected: ok, failed: fail,
+    ranked: { na: naKeys.length, eu: euKeys.length },
+    collected: ok,
+    failed: fail,
   });
 };
