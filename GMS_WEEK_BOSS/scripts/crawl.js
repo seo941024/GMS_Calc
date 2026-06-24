@@ -11,6 +11,13 @@ const redis = new Redis({
 const NEXON_BASE = 'https://www.nexon.com/api/maplestory/no-auth/ranking/v2';
 const HEADERS = { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' };
 
+const HEROIC_WORLDS = new Set([45, 46, 70]);
+const WORLD_NAMES = {
+  1:'Bera', 19:'Scania', 17:'Aurora',
+  45:'Kronos', 46:'Hyperion',
+  30:'Luna', 70:'Solis',
+};
+
 async function fetchPage(reg, type, reboot, page) {
   try {
     const url = `${NEXON_BASE}/${reg}?type=${type}&id=weekly&reboot_index=${reboot}&page_index=${page}`;
@@ -35,18 +42,17 @@ async function crawlType(reg, type, reboot, maxPages = 300, concurrency = 15) {
         const key = (c.characterName || '').toLowerCase();
         if (!key) continue;
         result[key] = result[key] || {};
-        if (type === 'world')  result[key].worldRank    = c.rank;
+        if (type === 'overall') {
+          result[key].worldRank = c.rank;
+          result[key].worldID   = c.worldID;
+          result[key].world     = WORLD_NAMES[c.worldID] || '';
+          result[key].job       = c.jobName || '';
+        }
         if (type === 'job')    result[key].jobRankWorld  = c.rank;
         if (type === 'legion') {
           result[key].legionRank  = c.rank;
           result[key].legionLevel = c.legionLevel || c.unionLevel || 0;
           result[key].legionPower = c.legionPower || c.legionCombatPower || c.combatPower || 0;
-        }
-        if (type === 'overall') {
-          result[key].worldRank = c.rank;
-          result[key].worldID   = c.worldID;
-          result[key].world     = c.worldName || '';
-          result[key].job       = c.jobName   || '';
         }
       }
     }
@@ -62,11 +68,67 @@ function merge(base, patch) {
   }
 }
 
+// tracked 캐릭터 개별 조회
+async function lookupTracked(name, region) {
+  const reg = region === 'eu' ? 'eu' : 'na';
+  const lc = name.toLowerCase();
+
+  const fetchRank = (type, rb) =>
+    fetch(`${NEXON_BASE}/${reg}?type=${type}&id=weekly&reboot_index=${rb}&page_index=1&character_name=${encodeURIComponent(name)}`, { headers: HEADERS })
+      .then(r => r.ok ? r.json() : null).catch(() => null);
+
+  const [od0, od1] = await Promise.all([fetchRank('overall', 0), fetchRank('overall', 1)]);
+  const findHit = d => d && d.ranks && d.ranks.find(c => (c.characterName || '').toLowerCase() === lc);
+  const hit = findHit(od0) || findHit(od1);
+  if (!hit) return null;
+
+  const ri = HEROIC_WORLDS.has(hit.worldID) ? 1 : 0;
+
+  const [ld, jd] = await Promise.all([
+    fetchRank('legion', 0),
+    fetchRank('job', ri),
+  ]);
+
+  const lhit = ld && (ld.ranks || []).find(c => (c.characterName || '').toLowerCase() === lc);
+  const jhit = jd && (jd.ranks || []).find(c => (c.characterName || '').toLowerCase() === lc);
+
+  return {
+    worldRank:    hit.rank || 0,
+    worldID:      hit.worldID,
+    world:        WORLD_NAMES[hit.worldID] || '',
+    job:          hit.jobName || '',
+    jobRankWorld: jhit ? jhit.rank : 0,
+    legionRank:   lhit ? lhit.rank : 0,
+    legionLevel:  lhit ? (lhit.legionLevel || lhit.unionLevel || 0) : 0,
+    legionPower:  lhit ? (lhit.legionPower || lhit.combatPower || 0) : 0,
+  };
+}
+
+// 히스토리 스냅샷 저장
+function todayStr() {
+  const d = new Date();
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())}`;
+}
+
+async function pushSnapshot(key, snap) {
+  let arr = [];
+  const raw = await redis.get('hist:' + key);
+  if (raw) arr = typeof raw === 'string' ? JSON.parse(raw) : raw;
+  if (!Array.isArray(arr)) arr = [];
+  const last = arr[arr.length - 1];
+  if (last && last.date === snap.date) arr[arr.length - 1] = snap;
+  else arr.push(snap);
+  arr = arr.slice(-180);
+  await redis.set('hist:' + key, JSON.stringify(arr));
+}
+
 async function main() {
   console.log('=== GMS 랭킹 크롤러 시작 ===');
 
   const MAX = 300;
 
+  // ── 1) 전체 랭킹 크롤링 ──
   const [naWorld0, naWorld1, naJob0, naJob1, naLegion,
          euWorld0, euWorld1, euJob0,  euJob1,  euLegion] = await Promise.all([
     crawlType('na', 'overall', 0, MAX),
@@ -93,23 +155,69 @@ async function main() {
 
   console.log(`크롤링 완료: NA ${Object.keys(naData).length}명, EU ${Object.keys(euData).length}명`);
 
-  if (Object.keys(naData).length === 0 && Object.keys(euData).length === 0) {
-    console.error('데이터 없음 → 종료');
-    process.exit(1);
+  if (Object.keys(naData).length > 0 || Object.keys(euData).length > 0) {
+    const ts = Date.now();
+    const pipe = redis.pipeline();
+    for (const [name, data] of Object.entries(naData)) {
+      pipe.set(`rnk:na:${name}`, JSON.stringify({ ...data, ts }), { ex: 60 * 60 * 25 });
+    }
+    for (const [name, data] of Object.entries(euData)) {
+      pipe.set(`rnk:eu:${name}`, JSON.stringify({ ...data, ts }), { ex: 60 * 60 * 25 });
+    }
+    await pipe.exec();
+    console.log('Redis 랭킹 저장 완료!');
   }
 
-  const ts = Date.now();
-  const pipe = redis.pipeline();
+  // ── 2) tracked 캐릭터 개별 조회 + 스냅샷 ──
+  let tracked = [];
+  try { tracked = await redis.smembers('tracked') || []; } catch { }
+  console.log(`tracked 캐릭터: ${tracked.length}명`);
 
-  for (const [name, data] of Object.entries(naData)) {
-    pipe.set(`rnk:na:${name}`, JSON.stringify({ ...data, ts }), { ex: 60 * 60 * 25 });
-  }
-  for (const [name, data] of Object.entries(euData)) {
-    pipe.set(`rnk:eu:${name}`, JSON.stringify({ ...data, ts }), { ex: 60 * 60 * 25 });
+  let ok = 0, fail = 0;
+  for (const entry of tracked) {
+    const parts  = String(entry).split('|');
+    const region = parts[1] || 'na';
+    const reboot = parts[2] === '1';
+    const name   = parts.slice(3).join('|');
+    const lc     = name.toLowerCase();
+    const histKey = `${region}_${reboot ? 'r' : 'n'}_${lc}`;
+
+    try {
+      // Redis에 랭킹 데이터 없으면 개별 조회
+      const cached = await redis.get(`rnk:${region}:${lc}`);
+      if (!cached) {
+        const info = await lookupTracked(name, region);
+        if (info) {
+          const ts = Date.now();
+          await redis.set(`rnk:${region}:${lc}`, JSON.stringify({ ...info, ts }), { ex: 60 * 60 * 25 });
+          console.log(`  개별조회 완료: ${name}`);
+        }
+      }
+
+      // 스냅샷은 overall API로 exp 가져오기
+      const snapData = await fetch(
+        `${NEXON_BASE}/${region}?type=overall&id=weekly&reboot_index=${reboot ? 1 : 0}&page_index=1&character_name=${encodeURIComponent(name)}`,
+        { headers: HEADERS }
+      ).then(r => r.ok ? r.json() : null).catch(() => null);
+
+      const hit = snapData && (snapData.ranks || []).find(c => (c.characterName || '').toLowerCase() === lc);
+      if (hit) {
+        await pushSnapshot(histKey, {
+          date: todayStr(), ts: Date.now(),
+          level: hit.level, exp: Number(hit.exp) || 0,
+          img: hit.characterImgURL || '', job: hit.jobName || '',
+        });
+        ok++;
+      } else {
+        fail++;
+      }
+    } catch (e) {
+      console.error(`  실패: ${name} —`, e.message);
+      fail++;
+    }
   }
 
-  await pipe.exec();
-  console.log('Redis 저장 완료!');
+  console.log(`스냅샷 완료 — ok: ${ok}, fail: ${fail}`);
 }
 
 main().catch(e => { console.error(e); process.exit(1); });
