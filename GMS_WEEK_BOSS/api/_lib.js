@@ -12,28 +12,36 @@ function worldName(id){ return WORLD_NAMES[id] || ('World #' + id); }
 
 const NEXON_BASE = 'https://www.nexon.com/api/maplestory/no-auth/ranking/v2';
 
+// Heroic(리부트) 월드 ID 목록
+const HEROIC_WORLDS = new Set([45, 46, 70]); // Kronos, Hyperion, Solis
+
 /* nexon 랭킹에서 캐릭터 1명 조회 */
 async function lookupCharacter(name, reboot, region) {
   const reg = region === 'eu' ? 'eu' : 'na';
   const headers = { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' };
+  const lc = name.toLowerCase();
 
-  // 1) overall 랭킹 (레벨·exp·직업·이미지·월드)
-  const overallUrl = `${NEXON_BASE}/${reg}?type=overall&id=weekly&reboot_index=${reboot ? 1 : 0}`
-                   + `&page_index=1&character_name=${encodeURIComponent(name)}`;
-  const r = await fetch(overallUrl, { headers });
-  if (!r.ok) throw new Error('Nexon 응답 오류 ' + r.status);
-  const data = await r.json();
-  if (!data.ranks || data.ranks.length === 0) return null;
+  // 1) overall 랭킹 — reboot 0/1 둘 다 시도해서 찾음
+  const fetchOverall = (rb) =>
+    fetch(`${NEXON_BASE}/${reg}?type=overall&id=weekly&reboot_index=${rb}&page_index=1&character_name=${encodeURIComponent(name)}`, { headers })
+      .then(r => r.ok ? r.json() : null).catch(() => null);
 
-  const lc  = name.toLowerCase();
-  const hit = data.ranks.find(c => (c.characterName||'').toLowerCase() === lc) || data.ranks[0];
+  const [od0, od1] = await Promise.all([fetchOverall(0), fetchOverall(1)]);
+  const findHit = (d) => d && d.ranks && d.ranks.find(c => (c.characterName||'').toLowerCase() === lc);
+  let hit = findHit(od0) || findHit(od1);
+  if (!hit) {
+    // fallback: 첫 번째 결과라도
+    hit = (od0 && od0.ranks && od0.ranks[0]) || (od1 && od1.ranks && od1.ranks[0]);
+  }
+  if (!hit) return null;
+
+  // worldID 기반으로 Heroic 여부 자동 판단
+  const ri = HEROIC_WORLDS.has(hit.worldID) ? 1 : 0;
 
   // 2) legion / world / job 랭킹 병렬 조회 — 실패해도 무시
   let legionLevel = hit.legionLevel || 0;
   let legionPower = 0, legionRank = 0;
-  let worldRank = 0, jobRankWorld = 0, jobRankGMS = 0;
-
-  const ri = reboot ? 1 : 0;
+  let worldRank = 0, jobRankWorld = 0;
   const fetchRank = (type, rb) =>
     fetch(`${NEXON_BASE}/${reg}?type=${type}&id=weekly&reboot_index=${rb}&page_index=1&character_name=${encodeURIComponent(name)}`, { headers })
       .then(r => r.ok ? r.json() : null).catch(() => null);
