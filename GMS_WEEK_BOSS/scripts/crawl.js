@@ -19,11 +19,16 @@ const REGION_CODE = { 'north-america': 'na', 'europe': 'eu' };
 const REBOOT_CODE = { 'heroic': 1, 'both': 0, 'interactive': 0 };
 
 async function scrapePage(page, url) {
-  await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
-  await page.waitForSelector('tbody tr', { timeout: 15000 }).catch(() => {});
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  
+  // Vue 렌더링 기다리기
+  await new Promise(r => setTimeout(r, 5000));
+  
+  // tbody 기다리기
+  await page.waitForSelector('tbody', { timeout: 20000 }).catch(() => {});
 
   const html = await page.content();
-  console.log('HTML snippet:', html.slice(2000, 4000));
+  console.log('HTML snippet:', html.slice(5000, 7000));  // 뒷부분 확인
 
   const data = await page.evaluate(() => {
     const rows = document.querySelectorAll('tbody tr');
