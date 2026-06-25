@@ -775,7 +775,7 @@ function renderCharInfo() {
       ? `<img class="ci-portrait__img" src="${f.img}" onerror="this.style.display='none';this.parentElement.classList.add('ci-portrait--noimg')" />`
       : '';
     const lv = f?.level || ch.level;
-    const exp = f?.exp ? `<div class="ci-card__exp">누적 EXP ${Number(f.exp).toLocaleString()}</div>` : '';
+    const exp = '';
     const rankRow = f?.rank ? `
       <div class="ci-card__ranks">
         <div class="ci-ranks-title">랭킹 / 정보</div>
