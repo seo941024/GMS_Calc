@@ -105,9 +105,9 @@ const HEXA_JOB_DATA = {
   /* ── 이미지 폴더가 있는 직업 ── */
   'Mercedes': {
     folder:  'Mercedes',
-    skill:   ['스킬 노드 1', '스킬 노드 2'],
-    mastery: ['마스터리 1', '마스터리 2', '마스터리 3', '마스터리 4'],
-    boost:   ['부스트 1', '부스트 2', '부스트 3', '부스트 4'],
+    skill:   ['Unfading Glory', 'Elemental Spirit'],
+    mastery: ['Spikes Royale', 'Rising Rush', 'Aerial Barrage', 'Ishtar\'s Ring'],
+    boost:   ['Double Down', 'Unicorn Spike', 'Leap Tornado', 'Rolling Moonsault'],
     common:  ['솔 야누스', '솔 헤카테'],
   },
   'Adele': {
