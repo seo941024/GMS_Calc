@@ -173,14 +173,10 @@ function updateCrystalBar() {
 function renderCharList() {
   const ul = document.getElementById('charList');
   ul.innerHTML = '';
-  const labelEl = document.querySelector('.sb-label');
   if (!state.chars.length) {
-    if (labelEl) labelEl.textContent = '캐릭터';
     ul.innerHTML = '<li style="text-align:center;color:var(--text-sub);font-size:.8rem;padding:14px">캐릭터를 추가하세요</li>';
     updateCrystalBar(); return;
   }
-  const activeName = state.chars[state.activeChar ?? 0]?.name || '캐릭터';
-  if (labelEl) labelEl.textContent = activeName;
   const i  = state.activeChar ?? 0;
   const ch = state.chars[i];
   if (!ch) { updateCrystalBar(); return; }
