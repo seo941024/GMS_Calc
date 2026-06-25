@@ -425,12 +425,12 @@ function sfBuildStageGrid() {
 
     const opts = [];
     for (let st = 1; st <= maxStage; st++) {
-      const isProt = s <= 16 && st === 4;
+      const isProt = s <= 17 && st === 4;
       const label  = isProt ? '파괴방지' : `${st}단계`;
       opts.push(`<option value="${st}" ${curStage===st?'selected':''}>${label}</option>`);
     }
 
-    const p = (s <= 16 && curStage === 4)
+    const p = (s <= 17 && curStage === 4)
       ? getSfProb(s, shining, true, 1)
       : getSfProb(s, shining, false, curStage);
 
