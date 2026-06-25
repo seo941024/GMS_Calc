@@ -775,14 +775,15 @@ function renderCharInfo() {
       ? `<img src="${f.img}" onerror="this.style.display='none';this.parentElement.classList.add('cg-portrait--no')" />`
       : '';
     const rank = f?.rank ? `<div class="cg-rank">#${f.rank.toLocaleString()}</div>` : '';
+    const lv = f?.level || ch.level;
     const isActive = i === state.activeChar;
     return `
       <div class="cg-card${isActive ? ' cg-card--active' : ''}" data-ci="${i}">
         <div class="cg-portrait${f?.img ? '' : ' cg-portrait--no'}">${portrait}<span class="cg-noimg">NO IMAGE</span></div>
         <div class="cg-body">
           <div class="cg-name">${ch.name}</div>
-          <div class="cg-job">${jn}</div>
-          <div class="cg-meta">${sIconHtml}${world ? world + ' · ' : ''}Lv.${ch.level}</div>
+          <div class="cg-job">${jn || '—'}</div>
+          <div class="cg-meta">${sIconHtml}${world ? world + ' · ' : ''}Lv.${lv}</div>
           ${rank}
         </div>
         <div class="cg-btns">
