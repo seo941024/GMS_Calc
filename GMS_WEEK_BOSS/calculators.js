@@ -77,7 +77,7 @@ function renderAllHexaLists() {
   const commonIcoFull = [
     'images/skill/Common/sol_janus.webp',
     'images/skill/Common/sol_hecate.webp',
-    ...jd.common.slice(2).map((_, i) => ico(13 + i)),
+    ...jd.common.slice(2).map((_, i) => ico(15 + i)),
   ];
 
   renderNodeList(hxSkill,   'hxSkillList',   'hx_skill',   [ico(1), ico(2)]);
