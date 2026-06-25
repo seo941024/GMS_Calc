@@ -21,7 +21,7 @@ const BOSS_DATA = [
   { id:'demian',     name:'데미안',              diffs:{normal:169_000_000,hard:421_875_000},                                            maxParty:6, minLevel:200, img:'images/bosses/demian.webp' },
   { id:'suu',        name:'스우',                diffs:{normal:162_562_500,hard:444_675_000,extreme:1_397_500_000},                      maxParty:{normal:6,hard:6,extreme:2}, minLevel:200, img:'images/bosses/suu.webp' },
   { id:'papulus',    name:'파풀라투스',          diffs:{chaos:132_250_000},                                                              maxParty:6, minLevel:180, img:'images/bosses/papulus.webp' },
-  { id:'akechi',     name:'아케치',              diffs:{normal:144_000_000},                                                             maxParty:6, minLevel:140, img:'images/bosses/akechi.png' },
+  { id:'akechi',     name:'아케치',              diffs:{normal:144_000_000},                                                             maxParty:6, minLevel:140, img:'images/bosses/Akechi.png' },
   { id:'nohime',     name:'노히메',              diffs:{normal:81_000_000},                                                              maxParty:6, minLevel:140, img:'images/bosses/Princess_No.png' },
   { id:'vellum',     name:'벨룸',                diffs:{chaos:105_062_500},                                                              maxParty:6, minLevel:180, img:'images/bosses/vellum.webp' },
   { id:'bq',         name:'블러디퀸',            diffs:{chaos:81_000_000},                                                               maxParty:6, minLevel:180, img:'images/bosses/bq.webp' },
