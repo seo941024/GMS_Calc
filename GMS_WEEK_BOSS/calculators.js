@@ -61,7 +61,7 @@ function renderAllHexaLists() {
   const job = ch?.fetched?.job || (typeof JOB_LIST !== 'undefined' && JOB_LIST[ch?.jobIdx]?.name) || '';
   const jd  = (typeof HEXA_JOB_DATA !== 'undefined' && HEXA_JOB_DATA[job]) || (typeof HEXA_DEFAULT_DATA !== 'undefined' ? HEXA_DEFAULT_DATA : { folder:null, skill:['스킬 노드 1','스킬 노드 2'], mastery:['마스터리 1','마스터리 2','마스터리 3','마스터리 4'], boost:['부스트 1','부스트 2','부스트 3','부스트 4'], common:['솔 야누스','솔 헤카테'] });
 
-  const ico = (n) => jd.folder ? `images/skill/${jd.folder}/${n}.webp` : null;
+  const ico = (n) => jd.folder ? `images/skill/${jd.folder}/${n}.png` : null;
 
   hxSkill.forEach((n,i)   => { if(jd.skill[i])   n.name = jd.skill[i]; });
   hxMastery.forEach((n,i) => { if(jd.mastery[i]) n.name = jd.mastery[i]; });
