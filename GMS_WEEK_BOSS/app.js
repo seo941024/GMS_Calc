@@ -341,6 +341,10 @@ function renderBossTable() {
           showToast(`주간 결정석은 최대 ${MAX_CRYSTALS}개까지 판매 가능합니다.`);
           save(); renderBossTable(); renderCharList(); return;
         }
+        if (!boss.monthly && countWeeklyCrystals(ch) >= 14) {
+          showToast('캐릭터당 주간 보스는 최대 14개까지 선택 가능합니다.');
+          save(); renderBossTable(); renderCharList(); return;
+        }
         ch.checks[ck(bossId, diff)] = { on:true, party: ch.checks[ck(bossId, diff)]?.party ?? 1 };
       }
       save(); renderBossTable(); renderCharList();
@@ -838,12 +842,6 @@ function renderCharInfo() {
   // 랭킹 (가진 데이터: 전체 GMS 랭킹, 레지온)
   const rankRows = f ? `
     <div class="ci-rank-row"><span>${jobName} Rank in ${region}</span><b>${f.rank ? '#'+f.rank.toLocaleString() : '—'}</b></div>
-    <div class="ci-rank-row"><span>${world} Rank</span><b>${f.worldRank ? '#'+f.worldRank.toLocaleString() : '—'}</b></div>
-    <div class="ci-rank-row"><span>${jobName} Rank in ${world}</span><b>${f.jobRankWorld ? '#'+f.jobRankWorld.toLocaleString() : '—'}</b></div>
-    <div class="ci-rank-row ci-rank-row--div"></div>
-    <div class="ci-rank-row"><span>Legion Rank</span><b>${f.legionRank ? '#'+f.legionRank.toLocaleString() : '—'}</b></div>
-    <div class="ci-rank-row"><span>Legion Level</span><b>${f.legion ? f.legion.toLocaleString() : '—'}</b></div>
-    <div class="ci-rank-row"><span>Legion Power</span><b>${f.legionPower ? f.legionPower.toLocaleString() : '—'}</b></div>
   ` : '<div class="ci-rank-row"><span class="ci-dim">No ranking data — Edit character → Lookup</span></div>';
 
   box.innerHTML = `
