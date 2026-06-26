@@ -46,6 +46,37 @@ function genTraceSums() {
   return { weekly, weeklyFirst, mult };
 }
 
+function updateGenStats() {
+  const { weekly, weeklyFirst } = genTraceSums();
+  const held       = Math.max(0, genState.held);
+  const questCum   = (GENESIS_QUESTS[genState.quest] || GENESIS_QUESTS[0]).cum;
+  const totalSpent = questCum + held;
+  const remaining  = Math.max(0, GENESIS_TARGET - totalSpent);
+  const pct        = Math.min(100, Math.round(totalSpent / GENESIS_TARGET * 100));
+  const weeksLeft  = weekly <= 0 ? Infinity : remaining <= 0 ? 0 : remaining <= weeklyFirst ? 1 : 1 + Math.ceil((remaining - weeklyFirst) / weekly);
+  const daysLeft   = isFinite(weeksLeft) ? weeksLeft * 7 : null;
+  const durationStr = daysLeft != null ? `${daysLeft}일` : '—';
+
+  const startDate = genState.startDate || nextThursday();
+  const targetDate = (() => {
+    if (!isFinite(weeksLeft)) return '—';
+    const d = new Date(startDate);
+    const daysToThu = (4 - d.getDay() + 7) % 7;
+    d.setDate(d.getDate() + daysToThu + weeksLeft * 7);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  })();
+
+  const $ = id => document.getElementById(id);
+  const fill = $('genProgressFill'); if (fill) fill.style.width = pct + '%';
+  const pctEl = $('genPctText'); if (pctEl) pctEl.textContent = `${pct}% · ${fmtTrace(totalSpent)} / ${fmtTrace(GENESIS_TARGET)}`;
+  const sh = $('genStatHeld'); if (sh) sh.textContent = fmtTrace(held);
+  const ss = $('genStatSpent'); if (ss) ss.textContent = fmtTrace(totalSpent);
+  const sr = $('genStatRemaining'); if (sr) sr.textContent = fmtTrace(remaining);
+  const sw = $('genStatWeekly'); if (sw) sw.textContent = fmtTrace(weeklyFirst);
+  const sd = $('genStatDuration'); if (sd) sd.textContent = durationStr;
+  const sdt = $('genStatDate'); if (sdt) sdt.textContent = targetDate;
+}
+
 function renderGenesis() {
   const panel = document.getElementById('lib-genesis');
   const { weekly, weeklyFirst, mult } = genTraceSums();
@@ -171,33 +202,36 @@ function renderGenesis() {
 
       <!-- 우측: 통계 패널 -->
       <div class="card gen-stat-panel">
-        <div class="lib-progress" style="margin-bottom:6px"><div class="lib-progress__fill" style="width:${pct}%"></div></div>
-        <div class="lib-pct" style="margin-bottom:14px">${pct}% · ${fmtTrace(totalSpent)} / ${fmtTrace(GENESIS_TARGET)}</div>
+        <div class="lib-progress" style="margin-bottom:6px"><div class="lib-progress__fill" id="genProgressFill" style="width:${pct}%"></div></div>
+        <div class="lib-pct" id="genPctText" style="margin-bottom:14px">${pct}% · ${fmtTrace(totalSpent)} / ${fmtTrace(GENESIS_TARGET)}</div>
 
         <div class="gen-stat2"><span>필요 흔적</span><b>${fmtTrace(GENESIS_TARGET)}</b></div>
-        <div class="gen-stat2"><span>보유 흔적</span><b>${fmtTrace(held)}</b></div>
-        <div class="gen-stat2"><span>누적 진행</span><b>${fmtTrace(totalSpent)}</b></div>
-        <div class="gen-stat2"><span>남은 흔적</span><b>${fmtTrace(remaining)}</b></div>
+        <div class="gen-stat2"><span>보유 흔적</span><b id="genStatHeld">${fmtTrace(held)}</b></div>
+        <div class="gen-stat2"><span>누적 진행</span><b id="genStatSpent">${fmtTrace(totalSpent)}</b></div>
+        <div class="gen-stat2"><span>남은 흔적</span><b id="genStatRemaining">${fmtTrace(remaining)}</b></div>
         <div class="gen-stat2-div"></div>
-        <div class="gen-stat2"><span>주간 흔적</span><b>${fmtTrace(weeklyFirst)}</b></div>
+        <div class="gen-stat2"><span>주간 흔적</span><b id="genStatWeekly">${fmtTrace(weeklyFirst)}</b></div>
         <div class="gen-stat2-div"></div>
-        <div class="gen-stat2"><span>남은 기간</span><b>${durationStr}</b></div>
+        <div class="gen-stat2"><span>남은 기간</span><b id="genStatDuration">${durationStr}</b></div>
 
         <div class="gen-date-wrap">
           <div class="gen-date-label">예상 해방 날짜</div>
-          <div class="gen-date-big">${targetDate}</div>
+          <div class="gen-date-big" id="genStatDate">${targetDate}</div>
         </div>
       </div>
     </div>`;
 
   // 이벤트
   const genHeldEl = document.getElementById('genHeld');
-  const applyHeld = e => {
+  genHeldEl.addEventListener('input', e => {
+    const val = Math.max(0, Math.min(TRACE_HOLD_MAX, parseInt(e.target.value) || 0));
+    genState.held = val;
+    saveGen(); updateGenStats();
+  });
+  genHeldEl.addEventListener('change', e => {
     genState.held = Math.max(0, Math.min(TRACE_HOLD_MAX, parseInt(e.target.value) || 0));
-    saveGen(); renderGenesis();
-  };
-  genHeldEl.addEventListener('change', applyHeld);
-  genHeldEl.addEventListener('keydown', e => { if (e.key === 'Enter') applyHeld(e); });
+    saveGen(); updateGenStats();
+  });
   document.getElementById('genPass').addEventListener('change', e => {
     genState.pass = e.target.checked; saveGen(); renderGenesis();
   });
