@@ -366,25 +366,16 @@ function initStatOCR() {
   });
 
   // 필드별 합리적 최대값 (초과 시 경고)
-  const FIELD_MAX = {
-    'DAMAGE':300,'FINAL_DAMAGE':200,'IGNORE_DEF':100,'NORMAL_DMG':100,
-    'CRIT_RATE':200,'BUFF_DUR':200,'CD_NOT':100,'IGNORE_ELEM':100,
-    'ADD_STATUS':100,'SUMMONS':100,'CD_SEC':10,'CD_PCT':100,
-  };
-
   /* 테이블 렌더링 */
   function renderTable(parsed) {
     _parsed = parsed;
     _jtIdx  = parseInt(document.getElementById('statJobType').value);
     _fields = buildFields(_jtIdx, parsed);
     const tbody = _fields.map((f,i) => {
-      const v = parseFloat(f.val);
-      const warn = f.key && FIELD_MAX[f.key] && !isNaN(v) && v > FIELD_MAX[f.key];
       return `
       <tr>
         <td class="stat-lbl">${f.label}${f.note?`<br><span class="stat-note">${f.note}</span>`:''}</td>
-        <td><input class="inp stat-val-inp${warn?' stat-warn':''}" data-i="${i}" value="${f.val||''}" placeholder="—"
-          title="${warn?'⚠ 값이 비정상적으로 큽니다. 직접 수정해주세요.':''}"/>${warn?'<span style="color:#f87171;font-size:.7rem;margin-left:4px">⚠</span>':''}</td>
+        <td><input class="inp stat-val-inp" data-i="${i}" value="${f.val||''}" placeholder="—"/></td>
         <td class="stat-idx">[${f.idx}]</td>
       </tr>`;
     }).join('');
