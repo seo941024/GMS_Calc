@@ -134,8 +134,8 @@ function flameBuildStatTable() {
   // 헤더도 단계 1(=old T5)부터 역순
   const tierProbs = [5,4,3,2,1].map(t => {
     const p = prob[t-1];
-    const step = 6 - t; // 단계 번호
-    return `<th>${p>0 ? `단계 ${step}<br><span class="flame-th-prob">${(p*100).toFixed(0)}%</span>` : `<span class="flame-t--zero">단계 ${step}</span>`}</th>`;
+    const label = `${t+2}추`; // t5=7추, t4=6추, t3=5추, t2=4추, t1=3추
+    return `<th>${p>0 ? `${label}<br><span class="flame-th-prob">${(p*100).toFixed(0)}%</span>` : `<span class="flame-t--zero">${label}</span>`}</th>`;
   }).join('');
 
   document.getElementById('flameStatTable').innerHTML = `
@@ -238,7 +238,7 @@ function initAddOption() {
       <select class="sel" id="flameGoalOpt${i}"><option value="none">— 없음 —</option></select>
       <div style="display:flex;align-items:center;gap:6px">
         <select class="sel" id="flameGoalTier${i}" style="width:90px">
-          ${[1,2,3,4,5].map(t=>`<option value="${t}"${t===3?' selected':''}>단계 ${t}</option>`).join('')}
+          ${[1,2,3,4,5].map(t=>`<option value="${t}"${t===3?' selected':''}>${8-t}추</option>`).join('')}
         </select>
         <span style="font-size:.8rem;color:var(--text-sub)">옵션</span>
       </div>
@@ -273,14 +273,14 @@ function initAddOption() {
         </div>
 
         <div>
-          <div class="card__title">불꽃 종류</div>
+          <div class="card__title">불꽃 선택</div>
           <div class="sf-toggle-group" id="flameTypeGroup" style="margin-top:8px;flex-wrap:wrap">
             ${flameTypeButtons}
           </div>
         </div>
 
         <div>
-          <div class="card__title">목표 옵션 <span style="font-size:.75rem;font-weight:400;color:var(--text-sub)">(최대 4개)</span></div>
+          <div class="card__title">목표 옵션</div>
           <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
             ${goalRows}
           </div>
