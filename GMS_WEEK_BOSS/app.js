@@ -546,12 +546,12 @@ function charJobName(ch) {
 function charJobIconSrc(ch) {
   const en = ch.fetched?.job || JOB_LIST[ch.jobIdx]?.name;
   const asset = JOB_ASSET_NAMES[en] || en?.replace(/\s+/g, '');
-  return asset ? `images/jobs/${encodeURIComponent(asset)}.webp` : '';
+  return asset ? `images/jobs/${asset}.webp` : '';
 }
 function charJobHeadSrc(ch) {
   const en = ch.fetched?.job || JOB_LIST[ch.jobIdx]?.name;
   const asset = JOB_HEAD_ASSET_NAMES[en] || JOB_ASSET_NAMES[en] || en?.replace(/\s+/g, '');
-  return asset ? `images/jobs/Head/${encodeURIComponent(asset)}.webp` : '';
+  return asset ? `images/jobs/Head/${asset}.webp` : '';
 }
 function serverIconSrc(world) {
   const ext = SERVER_ASSET_EXT[world];
