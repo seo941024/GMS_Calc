@@ -171,11 +171,11 @@ function updateCrystalBar() {
   const elCM = document.getElementById('totalCrystalMonthly');
   if (elCM) elCM.textContent = totalM;
   const weekTotal  = state.chars.reduce((s, c) => s + charWeeklyMeso(c), 0);
-  const monthTotal = Math.max(0, state.chars.reduce((s, c) => s + charMonthlyMeso(c), 0) - rentalMonthlyCost());
+  const monthTotal = state.chars.reduce((s, c) => s + charMonthlyMeso(c), 0) - rentalMonthlyCost();
   const elW = document.getElementById('totalWeekMeso');
   if (elW) elW.textContent = fmtMeso(weekTotal);
   const elM = document.getElementById('totalMonthMeso');
-  if (elM) elM.textContent = fmtMeso(monthTotal);
+  if (elM) { elM.textContent = (monthTotal < 0 ? '-' : '') + fmtMeso(Math.abs(monthTotal)); elM.style.color = monthTotal < 0 ? '#f87171' : ''; }
 }
 
 /* ── 캐릭터 목록 렌더 (사이드바: active 1개만) ── */
@@ -426,8 +426,10 @@ function updateRentalTotals() {
   const mEl = document.getElementById('monthlyTotal');
   const wCost2 = rentalWeeklyCost();
   const mCost2 = rentalMonthlyCost();
-  if (wEl) wEl.textContent = fmtMeso(Math.max(0, bossWeekly - wCost2));
-  if (mEl) mEl.textContent = fmtMeso(Math.max(0, charMonthlyMeso(ch) - mCost2));
+  const weekNet = bossWeekly - wCost2;
+  const monthNet = charMonthlyMeso(ch) - mCost2;
+  if (wEl) { wEl.textContent = (weekNet < 0 ? '-' : '') + fmtMeso(Math.abs(weekNet)); wEl.style.color = weekNet < 0 ? '#f87171' : 'var(--accent)'; }
+  if (mEl) { mEl.textContent = (monthNet < 0 ? '-' : '') + fmtMeso(Math.abs(monthNet)); mEl.style.color = monthNet < 0 ? '#f87171' : 'var(--accent)'; }
   updateCrystalBar();
 }
 
