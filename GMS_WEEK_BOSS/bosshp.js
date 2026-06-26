@@ -37,7 +37,7 @@ function renderBusPanel(groups) {
   const checked = groups.filter(b => busChecked.has(b.name));
 
   if (checked.length === 0) {
-    busEl.innerHTML = '<div class="bus-empty">보스 카드의 <b>+</b> 버튼으로 추가하세요</div>';
+    busEl.innerHTML = '<div class="bus-empty">토글키를 눌러 보스를 추가하세요</div>';
     return;
   }
 
@@ -88,8 +88,8 @@ function renderBusPanel(groups) {
     btn.addEventListener('click', () => {
       const name = btn.dataset.boss;
       busChecked.delete(name);
-      // 카드 토글 아이콘 업데이트
-      document.querySelector(`.bus-toggle[data-boss="${name}"]`)?.classList.remove('on');
+      const chk = document.querySelector(`.bus-toggle-input[data-boss="${name}"]`);
+      if (chk) chk.checked = false;
       renderBusPanel(groups);
     });
   });
@@ -169,7 +169,10 @@ function renderBossHPTable() {
         <div class="bhp-card__top">
           <div class="bhp-name-row">
             <div class="bhp-card__name">${active.nameOverride || boss.name}</div>
-            <button class="bus-toggle${isOn ? ' on' : ''}" data-boss="${boss.name}" title="버스 참조에 추가">${isOn ? '✓' : '+'}</button>
+            <label class="bus-toggle-wrap" title="버스 참조에 추가">
+              <input type="checkbox" class="bus-toggle-input" data-boss="${boss.name}"${isOn ? ' checked' : ''} />
+              <span class="bus-toggle-track"><span class="bus-toggle-thumb"></span></span>
+            </label>
           </div>
           <div class="bhp-card__info">
             <span class="bhp-lv">Lv.${active.lv ?? '—'}</span>
@@ -192,18 +195,11 @@ function renderBossHPTable() {
     });
   });
 
-  container.querySelectorAll('.bus-toggle').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const name = btn.dataset.boss;
-      if (busChecked.has(name)) {
-        busChecked.delete(name);
-        btn.classList.remove('on');
-        btn.textContent = '+';
-      } else {
-        busChecked.add(name);
-        btn.classList.add('on');
-        btn.textContent = '✓';
-      }
+  container.querySelectorAll('.bus-toggle-input').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const name = chk.dataset.boss;
+      if (chk.checked) busChecked.add(name);
+      else busChecked.delete(name);
       renderBusPanel(groups);
     });
   });
