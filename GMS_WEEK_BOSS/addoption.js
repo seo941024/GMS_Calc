@@ -12,15 +12,15 @@ const FLAME_TYPES = {
 const FLAME_OPTIONS_ARMOR  = ['STR','DEX','INT','LUK','STR+DEX','STR+INT','STR+LUK','DEX+INT','DEX+LUK','INT+LUK','HP','MP','방어력','착용레벨감소','ATTACK','MAGIC ATK','ALL%'];
 const FLAME_OPTIONS_WEAPON = ['STR','DEX','INT','LUK','STR+DEX','STR+INT','STR+LUK','DEX+INT','DEX+LUK','INT+LUK','HP','MP','방어력','착용레벨감소','ATTACK','MAGIC ATK','ALL%','보공%','데미지%'];
 
-// 스탯 테이블엔 의미있는 옵션만 표시 (0값 옵션 제외)
-const FLAME_DISPLAY_ARMOR  = ['STR','DEX','INT','LUK','STR+DEX','STR+INT','STR+LUK','DEX+INT','DEX+LUK','INT+LUK','HP','ATTACK','MAGIC ATK','ALL%'];
-const FLAME_DISPLAY_WEAPON = ['STR','DEX','INT','LUK','STR+DEX','STR+INT','STR+LUK','DEX+INT','DEX+LUK','INT+LUK','HP','ATTACK','MAGIC ATK','ALL%','보공%','데미지%'];
+// 스탯 테이블 표시 옵션
+const FLAME_DISPLAY_ARMOR  = ['STR','DEX','INT','LUK','STR+DEX','STR+INT','STR+LUK','DEX+INT','DEX+LUK','INT+LUK','HP','MP','ALL%','ATTACK','MAGIC ATK','방어력','착용레벨감소'];
+const FLAME_DISPLAY_WEAPON = ['STR','DEX','INT','LUK','STR+DEX','STR+INT','STR+LUK','DEX+INT','DEX+LUK','INT+LUK','HP','MP','ALL%','ATTACK','MAGIC ATK','보공%','데미지%','방어력','착용레벨감소'];
 
 const FLAME_OPTION_LABELS = {
   'STR':'STR', 'DEX':'DEX', 'INT':'INT', 'LUK':'LUK',
   'STR+DEX':'STR+DEX', 'STR+INT':'STR+INT', 'STR+LUK':'STR+LUK',
   'DEX+INT':'DEX+INT', 'DEX+LUK':'DEX+LUK', 'INT+LUK':'INT+LUK',
-  'HP':'HP', 'MP':'MP', '방어력':'방어력', '착용레벨감소':'착용레벨감소',
+  'HP':'HP', 'MP':'MP', '방어력':'방어력', '착용레벨감소':'착감',
   'ATTACK':'공격력', 'MAGIC ATK':'마력',
   'ALL%':'올스탯%', '보공%':'보스데미지%', '데미지%':'데미지%',
 };
@@ -28,16 +28,18 @@ const FLAME_OPTION_LABELS = {
 function flameStatValue(option, tier, level, isBoss) {
   const w = isBoss ? 2 : 0;
   const t = tier; // 1-5
-  if (['STR','DEX','INT','LUK'].includes(option))
-    return (level < 250 ? Math.floor(level / 20) + 1 : 12) * (t + w);
+  if (['STR','DEX','INT','LUK','방어력'].includes(option))
+    return (Math.floor(level / 20) + 1) * (t + w);
   if (['STR+DEX','STR+INT','STR+LUK','DEX+INT','DEX+LUK','INT+LUK'].includes(option))
     return (Math.floor(level / 40) + 1) * (t + w);
   if (['ALL%','ATTACK','MAGIC ATK','데미지%'].includes(option))
     return t + w;
   if (option === '보공%')
     return (t + w) * 2;
-  if (option === 'HP')
-    return (level < 250 ? Math.floor(level / 10) * 10 * 3 : 700) * (t + w);
+  if (['HP','MP'].includes(option))
+    return Math.floor(level / 10) * 30 * (t + w);
+  if (option === '착용레벨감소')
+    return -((t + w) * 5);
   return 0;
 }
 
@@ -310,7 +312,7 @@ function initAddOption() {
           </div>
           <div class="field" style="justify-content:flex-end;padding-top:22px">
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.85rem;color:var(--text-sub)">
-              <input type="checkbox" id="flameBoss" />
+              <input type="checkbox" id="flameBoss" checked />
               보스 장비
             </label>
           </div>
@@ -360,7 +362,16 @@ function initAddOption() {
     });
   });
 
-  document.getElementById('flameLevel').addEventListener('change', refresh);
+  const levelEl = document.getElementById('flameLevel');
+  levelEl.addEventListener('change', () => {
+    const v = Math.max(100, Math.min(250, parseInt(levelEl.value) || 150));
+    levelEl.value = v;
+    refresh();
+  });
+  levelEl.addEventListener('input', () => {
+    const v = parseInt(levelEl.value);
+    if (!isNaN(v) && v > 250) levelEl.value = 250;
+  });
   document.getElementById('flameBoss').addEventListener('change', refresh);
   document.getElementById('flameBtnSim').addEventListener('click', flameSimulate);
 
