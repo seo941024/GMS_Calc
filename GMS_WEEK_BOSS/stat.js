@@ -54,8 +54,8 @@ function buildFields(jtIdx, parsed) {
   const statKeys = jt.stat.slice(0, 3);
   statKeys.forEach((s, i) => {
     rows.push({ label: `${s} 기본수치`,  key: s,    idx: 3+i*3, note: '합산값' });
-    rows.push({ label: `${s} % 수치`,   key: null,  idx: 4+i*3, val: '0', note: '수동 입력' });
-    rows.push({ label: `${s} % 미적용`, key: null,  idx: 5+i*3, val: '0', note: '수동 입력' });
+    rows.push({ label: `${s} % 수치`,   key: null,  idx: 4+i*3, val: '', note: '수동 입력' });
+    rows.push({ label: `${s} % 미적용`, key: null,  idx: 5+i*3, val: '', note: '수동 입력' });
   });
   const direct = [
     { label: '데미지%',             key: 'DAMAGE',      idx: 13 },
