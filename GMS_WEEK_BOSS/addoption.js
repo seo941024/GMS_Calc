@@ -125,12 +125,9 @@ function flameBuildStatTable() {
       const unit = ['ALL%','보공%','데미지%','ATTACK','MAGIC ATK'].includes(opt) ? '%' : '';
       return `<td class="${prob[t-1]===0?'flame-t--zero':''}">${prob[t-1]>0 ? v+unit : '—'}</td>`;
     });
-    const avg = [1,2,3,4,5].reduce((s,t,i) => s + prob[i] * flameStatValue(opt,t,level,isBoss), 0);
-    const unit = ['ALL%','보공%','데미지%','ATTACK','MAGIC ATK'].includes(opt) ? '%' : '';
     return `<tr>
       <td class="flame-opt-lbl">${FLAME_OPTION_LABELS[opt]||opt}</td>
       ${vals.join('')}
-      <td class="flame-avg">${avg > 0 ? avg.toFixed(1)+unit : '—'}</td>
     </tr>`;
   }).join('');
 
@@ -141,7 +138,6 @@ function flameBuildStatTable() {
       <thead><tr>
         <th>스탯</th>
         ${tierProbs}
-        <th>평균</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
