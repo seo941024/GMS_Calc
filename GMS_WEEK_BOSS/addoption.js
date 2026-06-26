@@ -134,8 +134,10 @@ function flameBuildStatTable() {
   // 헤더도 단계 1(=old T5)부터 역순
   const tierProbs = [5,4,3,2,1].map(t => {
     const p = prob[t-1];
-    const label = `${t+2}추`; // t5=7추, t4=6추, t3=5추, t2=4추, t1=3추
-    return `<th>${p>0 ? `${label}<br><span class="flame-th-prob">${(p*100).toFixed(0)}%</span>` : `<span class="flame-t--zero">${label}</span>`}</th>`;
+    const label = `${t+2}추`;
+    const probStr = p > 0 ? `${(p*100).toFixed(0)}%` : '—';
+    const probCls = p > 0 ? 'flame-th-prob' : 'flame-th-prob flame-t--zero';
+    return `<th><span class="${p===0?'flame-t--zero':''}">${label}</span><br><span class="${probCls}">${probStr}</span></th>`;
   }).join('');
 
   document.getElementById('flameStatTable').innerHTML = `
@@ -148,79 +150,66 @@ function flameBuildStatTable() {
     </table>`;
 }
 
+function _runSim(N, flameKey, level, isBoss, isWeapon, goals) {
+  const MAX_PER = 2_000_000;
+  const counts = [];
+  for (let i = 0; i < N; i++) {
+    let a = 0;
+    while (a < MAX_PER) {
+      a++;
+      if (checkGoals(rollFlame(flameKey, level, isBoss, isWeapon), goals)) break;
+    }
+    counts.push(a);
+  }
+  return counts;
+}
+
 function flameSimulate() {
   const flameKey = _flameGetFlameKey();
   const level    = _flameGetLevel();
   const isBoss   = _flameGetIsBoss();
   const isWeapon = _flameGetIsWeapon();
   const goals    = flameGetGoals();
+  const resEl    = document.getElementById('flameSimResult');
 
   if (!goals.length) {
-    document.getElementById('flameSimResult').innerHTML = '<p class="empty">목표 옵션을 설정하세요.</p>';
+    resEl.innerHTML = '<p class="empty">목표 옵션을 설정하세요.</p>';
     return;
   }
 
-  const N = 50_000;
-  const counts = [];
-  for (let i = 0; i < N; i++) {
-    let attempts = 0;
-    while (true) {
-      attempts++;
-      const lines = rollFlame(flameKey, level, isBoss, isWeapon);
-      if (checkGoals(lines, goals)) break;
+  resEl.innerHTML = '<p class="empty">계산 중...</p>';
+
+  setTimeout(() => {
+    let counts = _runSim(100_000, flameKey, level, isBoss, isWeapon, goals);
+    let N = 100_000;
+
+    // 목표 달성이 거의 없으면 100만회로 확장
+    const successCount = counts.filter(c => c < 2_000_000).length;
+    if (successCount < N * 0.5) {
+      counts = _runSim(1_000_000, flameKey, level, isBoss, isWeapon, goals);
+      N = 1_000_000;
     }
-    counts.push(attempts);
-  }
-  counts.sort((a, b) => a - b);
 
-  const mean = counts.reduce((s, c) => s + c, 0) / N;
-  const p50  = counts[Math.floor(N * 0.50)];
-  const p75  = counts[Math.floor(N * 0.75)];
-  const p90  = counts[Math.floor(N * 0.90)];
-  const p99  = counts[Math.floor(N * 0.99)];
+    counts.sort((a, b) => a - b);
+    const mean = Math.round(counts.reduce((s, c) => s + c, 0) / N);
 
-  /* 히스토그램 */
-  const BINS = 40;
-  const step = Math.max(1, Math.ceil(p99 / BINS));
-  const buckets = Array(BINS).fill(0);
-  counts.forEach(c => { const idx = Math.floor(c / step); if (idx < BINS) buckets[idx]++; });
-  const labels = buckets.map((_, i) => `${Math.round(step * (i + 0.5))}회`);
+    const pcts = [50, 75, 90, 95, 99];
+    const rows = pcts.map(pct => {
+      const val = counts[Math.floor(N * pct / 100)];
+      return `<div class="sf-res-item">
+        <span class="sf-res-label">상위 ${100-pct}%</span>
+        <span class="sf-res-val">${val.toLocaleString()}개 사용</span>
+      </div>`;
+    }).join('');
 
-  const canvas = document.getElementById('flameChart');
-  if (_flameChart) { _flameChart.destroy(); _flameChart = null; }
-  _flameChart = new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{ label: '빈도', data: buckets,
-        backgroundColor: 'rgba(251,191,36,0.45)',
-        borderColor: 'rgba(251,191,36,0.8)',
-        borderWidth: 1, borderRadius: 3 }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: {
-          title: items => labels[items[0].dataIndex],
-          label: item  => `${item.raw.toLocaleString()}회 (${(item.raw/N*100).toFixed(1)}%)`
-        }}
-      },
-      scales: {
-        x: { ticks: { color:'rgba(200,190,240,.6)', font:{size:9}, maxTicksLimit:10, maxRotation:45 }, grid:{color:'rgba(255,255,255,.05)'} },
-        y: { ticks: { color:'rgba(200,190,240,.6)', font:{size:10} }, grid:{color:'rgba(255,255,255,.08)'} }
-      }
-    }
-  });
-
-  document.getElementById('flameSimResult').innerHTML = `
-    <div class="sf-res-grid" style="margin-top:12px">
-      <div class="sf-res-item"><span class="sf-res-label">평균 시도</span><span class="sf-res-val">${mean.toFixed(1)}회</span></div>
-      <div class="sf-res-item"><span class="sf-res-label">50% (중앙값)</span><span class="sf-res-val">${p50}회</span></div>
-      <div class="sf-res-item"><span class="sf-res-label">75%</span><span class="sf-res-val">${p75}회</span></div>
-      <div class="sf-res-item"><span class="sf-res-label">90%</span><span class="sf-res-val">${p90}회</span></div>
-      <div class="sf-res-item"><span class="sf-res-label">99%</span><span class="sf-res-val">${p99}회</span></div>
-    </div>`;
+    resEl.innerHTML = `
+      <div class="sf-res-item" style="border-bottom:1px solid var(--border);margin-bottom:4px">
+        <span class="sf-res-label">평균</span>
+        <span class="sf-res-val">${mean.toLocaleString()}개 사용</span>
+      </div>
+      ${rows}
+      <p style="font-size:.75rem;color:var(--text-sub);margin-top:10px;text-align:right">시뮬레이션 ${N.toLocaleString()}회 기반 확률입니다.</p>`;
+  }, 0);
 }
 
 function initAddOption() {
@@ -286,7 +275,7 @@ function initAddOption() {
           </div>
         </div>
 
-        <button class="sbtn sbtn--ghost w100" id="flameBtnSim">시뮬레이션 (50,000회)</button>
+        <button class="sbtn sbtn--ghost w100" id="flameBtnSim">시뮬레이션</button>
       </div>
 
       <!-- 우측: 결과 -->
@@ -297,10 +286,9 @@ function initAddOption() {
           <div id="flameStatTable" style="margin-top:10px;overflow-x:auto"></div>
         </div>
 
-        <div class="card sf-chart-card">
-          <div class="sf-chart-header"><span class="sf-chart-lbl">시뮬레이션 결과</span></div>
-          <div class="sf-chart-box"><canvas id="flameChart"></canvas></div>
-          <div id="flameSimResult"><p class="empty">시뮬레이션 버튼을 눌러주세요.</p></div>
+        <div class="card">
+          <div class="card__title">시뮬레이션 결과</div>
+          <div id="flameSimResult" style="margin-top:10px"><p class="empty">시뮬레이션 버튼을 눌러주세요.</p></div>
         </div>
 
       </div>
