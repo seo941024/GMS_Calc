@@ -225,24 +225,20 @@ function flameSimulate() {
     return;
   }
 
+  if (_flameRunning) return;
+  _flameRunning = true;
   resEl.innerHTML = '<p class="empty">계산 중...</p>';
 
   setTimeout(() => {
-    const N_INIT = 100_000;
-    let counts = _runSim(N_INIT, flameKey, level, isBoss, isWeapon, goals);
-    let N = N_INIT;
+    try {
+      const N = 30_000;
+      const counts = _runSim(N, flameKey, level, isBoss, isWeapon, goals);
 
-    // 달성률 50% 미만이면 100만회로 확장
-    if (counts.filter(c => c < 2_000_000).length < N_INIT * 0.5) {
-      counts = _runSim(1_000_000, flameKey, level, isBoss, isWeapon, goals);
-      N = 1_000_000;
-    }
-
-    // 100만회 돌려도 성공 0이면 사실상 불가
-    if (counts.filter(c => c < 2_000_000).length === 0) {
-      resEl.innerHTML = `<p class="empty" style="color:#f87171">목표 달성 확률이 너무 낮아 시뮬레이션이 불가합니다.</p>`;
-      return;
-    }
+      // 한 번도 성공 못하면 사실상 불가
+      if (counts.filter(c => c < 2_000_000).length === 0) {
+        resEl.innerHTML = `<p class="empty" style="color:#f87171">목표 달성 확률이 너무 낮아 시뮬레이션이 불가합니다.</p>`;
+        return;
+      }
 
     counts.sort((a, b) => a - b);
     const mean = Math.round(counts.reduce((s, c) => s + c, 0) / N);
@@ -263,6 +259,11 @@ function flameSimulate() {
       </div>
       ${rows}
       <p style="font-size:.75rem;color:var(--text-sub);margin-top:10px;text-align:right">시뮬레이션 ${N.toLocaleString()}회 기반 확률입니다.</p>`;
+    } catch(e) {
+      resEl.innerHTML = `<p class="empty" style="color:#f87171">오류가 발생했습니다.</p>`;
+    } finally {
+      _flameRunning = false;
+    }
   }, 0);
 }
 

@@ -765,7 +765,7 @@ select.sel option { background: var(--bg2); color: var(--text); }
 .sf-tab.active { background: var(--primary); color: #fff; }
 .sf-tab:hover:not(.active) { background: rgba(139,92,246,.1); color: var(--text); }
 .sf-toggle-group { display: flex; gap: 0; border-radius: 10px; overflow: hidden; border: 1.5px solid var(--border); }
-.sf-toggle { flex: 1; padding: 9px 10px; font-size: .83rem; background: transparent; color: var(--text-sub); border: none; border-right: 1px solid var(--border); cursor: pointer; transition: all .15s; }
+.sf-toggle { flex: 1; padding: 10px 10px 8px; font-size: .83rem; background: transparent; color: var(--text-sub); border: none; border-right: 1px solid var(--border); cursor: pointer; transition: all .15s; display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .sf-toggle:last-child { border-right: none; }
 .sf-toggle.active { background: var(--primary); color: #fff; font-weight: 700; }
 .sf-toggle:hover:not(.active) { background: rgba(139,92,246,.1); color: var(--text); }
@@ -1496,4 +1496,4 @@ body.sidebar-open .hamburger span:nth-child(3) { transform: translateY(-6px) rot
 .flame-tbl .flame-avg { color: #fbbf24; font-weight: 600; }
 .flame-t--zero { color: var(--text-sub); opacity: .35; }
 .flame-th-prob { font-size: .72rem; font-weight: 400; color: var(--text-sub); }
-.flame-type-icon { width: 22px; height: 22px; object-fit: contain; vertical-align: middle; margin-right: 4px; }
+.flame-type-icon { width: 36px; height: 36px; object-fit: contain; display: block; margin: 0 auto 4px; }
