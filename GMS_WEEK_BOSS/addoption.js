@@ -122,7 +122,7 @@ function flameBuildStatTable() {
   const rows = pool.map(opt => {
     const vals = [5,4,3,2,1].map(t => {
       const v = flameStatValue(opt, t, level, isBoss);
-      const unit = ['ALL%','보공%','데미지%','ATTACK','MAGIC ATK'].includes(opt) ? '%' : '';
+      const unit = ['ALL%','보공%','데미지%'].includes(opt) ? '%' : '';
       return `<td class="${prob[t-1]===0?'flame-t--zero':''}">${prob[t-1]>0 ? v+unit : '—'}</td>`;
     });
     return `<tr>
