@@ -326,34 +326,39 @@ function flameSimulate() {
 
   setTimeout(() => {
     try {
-      const N = 30_000;
-      const counts = _runSim(N, flameKey, level, isBoss, isWeapon, goals);
+      // 확률 추정: 20만 회 단일 롤
+      const N = 200_000;
+      let k = 0;
+      for (let i = 0; i < N; i++) {
+        if (checkGoals(rollFlame(flameKey, level, isBoss, isWeapon), goals)) k++;
+      }
 
-      // 한 번도 성공 못하면 사실상 불가
-      if (counts.filter(c => c < 2_000_000).length === 0) {
-        resEl.innerHTML = `<p class="empty" style="color:#f87171">목표 달성 확률이 너무 낮아 시뮬레이션이 불가합니다.</p>`;
+      if (k === 0) {
+        resEl.innerHTML = `<p class="empty" style="color:#f87171">목표 달성 확률이 너무 낮아 계산이 불가합니다.</p>`;
         return;
       }
 
-    counts.sort((a, b) => a - b);
-    const mean = Math.round(counts.reduce((s, c) => s + c, 0) / N);
+      const p    = k / N;
+      const mean = Math.round(1 / p);
+      // 기하분포: 상위 n% 달성 횟수 = ceil(log(1 - n/100) / log(1 - p))
+      const pctCount = pct => Math.ceil(Math.log(1 - pct / 100) / Math.log(1 - p));
 
-    const pcts = [50, 75, 90, 95, 99];
-    const rows = pcts.map(pct => {
-      const val = counts[Math.floor(N * pct / 100)];
-      return `<div class="sf-res-item">
-        <span class="sf-res-label">상위 ${100-pct}%</span>
-        <span class="sf-res-val">${val.toLocaleString()}개 사용</span>
-      </div>`;
-    }).join('');
+      const pcts = [50, 25, 10, 5, 1];
+      const rows = pcts.map(pct => `
+        <div class="sf-res-item">
+          <span class="sf-res-label">상위 ${pct}%</span>
+          <span class="sf-res-val">${pctCount(100 - pct).toLocaleString()}개</span>
+        </div>`).join('');
 
-    resEl.innerHTML = `
-      <div class="sf-res-item" style="border-bottom:1px solid var(--border);margin-bottom:4px">
-        <span class="sf-res-label">평균</span>
-        <span class="sf-res-val">${mean.toLocaleString()}개 사용</span>
-      </div>
-      ${rows}
-      <p style="font-size:.75rem;color:var(--text-sub);margin-top:10px;text-align:right">시뮬레이션 ${N.toLocaleString()}회 기반 확률입니다.</p>`;
+      resEl.innerHTML = `
+        <div class="sf-res-item" style="border-bottom:1px solid var(--border);margin-bottom:8px;padding-bottom:8px">
+          <span class="sf-res-label">평균 기댓값</span>
+          <span class="sf-res-val" style="color:var(--accent)">${mean.toLocaleString()}개</span>
+        </div>
+        ${rows}
+        <p style="font-size:.72rem;color:var(--text-sub);margin-top:10px;text-align:right">
+          달성 확률 ${(p*100).toFixed(4)}% (${N.toLocaleString()}회 추정)
+        </p>`;
     } catch(e) {
       resEl.innerHTML = `<p class="empty" style="color:#f87171">오류가 발생했습니다.</p>`;
     } finally {
