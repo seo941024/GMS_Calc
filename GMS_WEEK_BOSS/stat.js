@@ -304,13 +304,19 @@ function initStatOCR() {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(_img, srcX, srcY, srcW, srcH, 0, 0, ocrCanvas.width, ocrCanvas.height);
 
-    // 전처리: 그레이스케일 → 이진화 (GMS 스탯창: 어두운 배경 + 밝은 텍스트)
+    // 전처리: GMS 스탯창 (어두운 배경 + 흰색/노란색 텍스트)
+    // 밝거나 채도 높은 픽셀(글자) → 검정, 어두운 픽셀(배경) → 흰색
     const imgData = ctx.getImageData(0, 0, ocrCanvas.width, ocrCanvas.height);
     const d = imgData.data;
     for (let i = 0; i < d.length; i += 4) {
-      const gray = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
-      // 밝은 픽셀(글자)은 검정, 어두운 픽셀(배경)은 흰색으로 → Tesseract 표준 (흰 배경 + 검정 글씨)
-      const bin = gray > 110 ? 0 : 255;
+      const r = d[i], g = d[i+1], b = d[i+2];
+      const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const saturation = max === 0 ? 0 : (max - min) / max;
+      // 밝은 픽셀(gray>140) 또는 채도 높은 픽셀(노란색/주황색 텍스트) → 글자
+      const isText = gray > 140 || (saturation > 0.3 && max > 120);
+      const bin = isText ? 0 : 255;
       d[i] = d[i+1] = d[i+2] = bin;
     }
     ctx.putImageData(imgData, 0, 0);
