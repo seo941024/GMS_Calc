@@ -1095,8 +1095,8 @@ select.sel.sf-stage-sel { width: 80px; flex-shrink: 0; font-size: .8rem; padding
 .ci-card__body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
 .ci-card__nameline { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .ci-jobicon { width: 55px; height: 55px; object-fit: contain; border-radius: 10px; background: var(--bg3); flex-shrink: 0; }
-.ci-card__name { font-size: 1.3rem; font-weight: 900; letter-spacing: -.2px; color: var(--text); }
-.ci-card__job { font-size: .8rem; color: var(--text-sub); font-weight: 700; }
+.ci-card__name { font-size: 1.05rem; font-weight: 900; letter-spacing: -.2px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ci-card__job { font-size: .72rem; color: var(--text-sub); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ci-card__meta {
   display: flex; align-items: center; justify-content: space-between;
   gap: 8px; flex-wrap: wrap;
@@ -1309,7 +1309,7 @@ select.sel.sf-stage-sel { width: 80px; flex-shrink: 0; font-size: .8rem; padding
 }
 
 /* ?? 罹먮┃??洹몃━??(罹먮┃???뺣낫 ?? ?? */
-.cg-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; padding:8px 0; }
+.cg-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; padding:8px 0; }
 .cg-card {
   background: rgba(15,10,32,.7);
   border: 1px solid rgba(139,92,246,.2);

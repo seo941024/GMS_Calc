@@ -837,10 +837,41 @@ function renderCharInfo() {
 
   box.innerHTML = `<div class="cg-grid">${cards}</div>`;
 
+  let dragSrc = null;
   box.querySelectorAll('.cg-card').forEach(card => {
+    card.setAttribute('draggable', 'true');
     card.addEventListener('click', e => {
       if (e.target.closest('[data-action]')) return;
       selectChar(parseInt(card.dataset.ci));
+    });
+    card.addEventListener('dragstart', e => {
+      dragSrc = card;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      box.querySelectorAll('.cg-card').forEach(c => c.classList.remove('drag-over'));
+    });
+    card.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (card !== dragSrc) {
+        box.querySelectorAll('.cg-card').forEach(c => c.classList.remove('drag-over'));
+        card.classList.add('drag-over');
+      }
+    });
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      if (!dragSrc || dragSrc === card) return;
+      const from = parseInt(dragSrc.dataset.ci);
+      const to   = parseInt(card.dataset.ci);
+      const arr  = state.chars;
+      arr.splice(to, 0, arr.splice(from, 1)[0]);
+      if (state.activeChar === from) state.activeChar = to;
+      else if (from < to && state.activeChar > from && state.activeChar <= to) state.activeChar--;
+      else if (from > to && state.activeChar >= to && state.activeChar < from) state.activeChar++;
+      save(); renderCharList(); renderBossTable(); renderCharInfo();
     });
   });
 }
