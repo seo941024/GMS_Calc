@@ -191,10 +191,13 @@ function renderGenesis() {
     </div>`;
 
   // 이벤트
-  document.getElementById('genHeld').addEventListener('input', e => {
+  const genHeldEl = document.getElementById('genHeld');
+  const applyHeld = e => {
     genState.held = Math.max(0, Math.min(TRACE_HOLD_MAX, parseInt(e.target.value) || 0));
     saveGen(); renderGenesis();
-  });
+  };
+  genHeldEl.addEventListener('change', applyHeld);
+  genHeldEl.addEventListener('keydown', e => { if (e.key === 'Enter') applyHeld(e); });
   document.getElementById('genPass').addEventListener('change', e => {
     genState.pass = e.target.checked; saveGen(); renderGenesis();
   });
