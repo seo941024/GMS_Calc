@@ -72,7 +72,8 @@ function checkGoals(lines, goals) {
   return goals.every(g => {
     if (!g.opt || g.opt === 'none') return true;
     const match = lines.find(l => l.opt === g.opt);
-    return match && match.tier >= g.minTier;
+    // 단계 1=최고, 단계 5=최저 → 단계 n 이상 = old tier >= (6-n)
+    return match && match.tier >= (6 - g.minTier);
   });
 }
 
@@ -117,10 +118,9 @@ function flameBuildStatTable() {
   const pool = isWeapon ? FLAME_OPTIONS_WEAPON : FLAME_OPTIONS_ARMOR;
   const { prob } = FLAME_TYPES[flameKey];
 
-  const avgTier = prob.reduce((s, p, i) => s + p * (i + 1), 0);
-
+  // 단계 1=최고(old T5) ~ 단계 5=최저(old T1), 역순 표시
   const rows = pool.map(opt => {
-    const vals = [1,2,3,4,5].map(t => {
+    const vals = [5,4,3,2,1].map(t => {
       const v = flameStatValue(opt, t, level, isBoss);
       const unit = ['ALL%','보공%','데미지%','ATTACK','MAGIC ATK'].includes(opt) ? '%' : '';
       return `<td class="${prob[t-1]===0?'flame-t--zero':''}">${prob[t-1]>0 ? v+unit : '—'}</td>`;
@@ -131,7 +131,12 @@ function flameBuildStatTable() {
     </tr>`;
   }).join('');
 
-  const tierProbs = prob.map((p,i) => `<th>${p>0 ? `T${i+1}<br><span class="flame-th-prob">${(p*100).toFixed(0)}%</span>` : `<span class="flame-t--zero">T${i+1}</span>`}</th>`).join('');
+  // 헤더도 단계 1(=old T5)부터 역순
+  const tierProbs = [5,4,3,2,1].map(t => {
+    const p = prob[t-1];
+    const step = 6 - t; // 단계 번호
+    return `<th>${p>0 ? `단계 ${step}<br><span class="flame-th-prob">${(p*100).toFixed(0)}%</span>` : `<span class="flame-t--zero">단계 ${step}</span>`}</th>`;
+  }).join('');
 
   document.getElementById('flameStatTable').innerHTML = `
     <table class="flame-tbl">
@@ -232,9 +237,8 @@ function initAddOption() {
     <div class="form-grid" style="grid-template-columns:1fr auto;gap:8px;align-items:center">
       <select class="sel" id="flameGoalOpt${i}"><option value="none">— 없음 —</option></select>
       <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-size:.8rem;color:var(--text-sub)">티어</span>
-        <select class="sel" id="flameGoalTier${i}" style="width:70px">
-          ${[1,2,3,4,5].map(t=>`<option value="${t}"${t===3?' selected':''}>${t}</option>`).join('')}
+        <select class="sel" id="flameGoalTier${i}" style="width:90px">
+          ${[1,2,3,4,5].map(t=>`<option value="${t}"${t===3?' selected':''}>단계 ${t}</option>`).join('')}
         </select>
         <span style="font-size:.8rem;color:var(--text-sub)">옵션</span>
       </div>
