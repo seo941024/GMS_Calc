@@ -105,9 +105,11 @@ function flameGetGoals() {
 }
 
 function flameRefreshOptionSelects() {
-  const isWeapon = _flameGetIsWeapon();
-  const display = isWeapon ? FLAME_DISPLAY_WEAPON : FLAME_DISPLAY_ARMOR;
-  const { prob } = FLAME_TYPES[_flameGetFlameKey()];
+  const isWeapon  = _flameGetIsWeapon();
+  const isBoss    = _flameGetIsBoss();
+  const display   = isWeapon ? FLAME_DISPLAY_WEAPON : FLAME_DISPLAY_ARMOR;
+  const { prob }  = FLAME_TYPES[_flameGetFlameKey()];
+  const gradeOffset = isBoss ? 2 : 0; // 보스=3추~7추, 비보스=1추~5추
 
   for (let i = 1; i <= 4; i++) {
     const sel = document.getElementById(`flameGoalOpt${i}`);
@@ -116,14 +118,20 @@ function flameRefreshOptionSelects() {
     sel.innerHTML = `<option value="none">— 없음 —</option>` +
       display.map(o => `<option value="${o}"${o===cur?' selected':''}>${FLAME_OPTION_LABELS[o]||o}</option>`).join('');
 
-    // 해당 불꽃에서 나올 수 없는 티어 비활성화
     const tierSel = document.getElementById(`flameGoalTier${i}`);
     if (!tierSel) continue;
-    // value 1=7추(oldT5) ~ 5=3추(oldT1), 정확히 그 티어 확률이 0이면 disabled
+    const curTier = tierSel.value;
+
+    // 티어 라벨 갱신 (보스/비보스 따라 추 번호 변경)
+    // value 1=최고(oldT5), value 5=최저(oldT1)
     Array.from(tierSel.options).forEach(opt => {
-      const oldTier = 6 - parseInt(opt.value); // value1→5, value5→1
+      const val = parseInt(opt.value);
+      const oldTier = 6 - val; // val1→oldT5, val5→oldT1
+      opt.text = `${oldTier + gradeOffset}추`;
       opt.disabled = prob[oldTier - 1] === 0;
     });
+    tierSel.value = curTier;
+
     // 현재 선택값이 disabled면 첫 번째 가능한 값으로 이동
     if (tierSel.options[tierSel.selectedIndex]?.disabled) {
       const first = Array.from(tierSel.options).find(o => !o.disabled);
@@ -153,10 +161,11 @@ function flameBuildStatTable() {
     </tr>`;
   }).join('');
 
-  // 헤더도 단계 1(=old T5)부터 역순
+  // 헤더: 보스 장비 여부에 따라 추 라벨 변경 (보스=t+2, 비보스=t)
+  const gradeOffset = isBoss ? 2 : 0;
   const tierProbs = [5,4,3,2,1].map(t => {
     const p = prob[t-1];
-    const label = `${t+2}추`;
+    const label = `${t+gradeOffset}추`;
     const probStr = p > 0 ? `${(p*100).toFixed(0)}%` : '—';
     const probCls = p > 0 ? 'flame-th-prob' : 'flame-th-prob flame-t--zero';
     return `<th><span class="${p===0?'flame-t--zero':''}">${label}</span><br><span class="${probCls}">${probStr}</span></th>`;
@@ -218,12 +227,20 @@ function flameSimulate() {
   resEl.innerHTML = '<p class="empty">계산 중...</p>';
 
   setTimeout(() => {
-    let counts = _runSim(100_000, flameKey, level, isBoss, isWeapon, goals);
-    let N = 100_000;
+    const N_INIT = 100_000;
+    let counts = _runSim(N_INIT, flameKey, level, isBoss, isWeapon, goals);
+    let N = N_INIT;
 
-    // 목표 달성이 거의 없으면 100만회로 확장
-    const successCount = counts.filter(c => c < 2_000_000).length;
-    if (successCount < N * 0.5) {
+    const successRate = counts.filter(c => c < 2_000_000).length / N_INIT;
+
+    // 달성률 1% 미만 → 사실상 불가능으로 처리
+    if (successRate < 0.01) {
+      resEl.innerHTML = `<p class="empty" style="color:#f87171">목표 달성 확률이 너무 낮습니다. (${(successRate*100).toFixed(2)}% 미만)</p>`;
+      return;
+    }
+
+    // 달성률 50% 미만이면 100만회로 확장
+    if (successRate < 0.5) {
       counts = _runSim(1_000_000, flameKey, level, isBoss, isWeapon, goals);
       N = 1_000_000;
     }
