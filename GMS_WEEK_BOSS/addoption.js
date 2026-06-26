@@ -124,12 +124,12 @@ function flameRefreshOptionSelects() {
     if (!tierSel) continue;
     const curTier = tierSel.value;
 
-    // 티어 라벨 갱신 (보스/비보스 따라 추 번호 변경)
+    // 티어 라벨: 1추(최고)~5추(최저)
     // value 1=최고(oldT5), value 5=최저(oldT1)
     Array.from(tierSel.options).forEach(opt => {
       const val = parseInt(opt.value);
       const oldTier = 6 - val; // val1→oldT5, val5→oldT1
-      opt.text = `${oldTier + gradeOffset}추`;
+      opt.text = `${val}추`; // val1→1추, val5→5추
       opt.disabled = prob[oldTier - 1] === 0;
     });
     tierSel.value = curTier;
@@ -163,11 +163,10 @@ function flameBuildStatTable() {
     </tr>`;
   }).join('');
 
-  // 헤더: 보스 장비 여부에 따라 추 라벨 변경 (보스=t+2, 비보스=t)
-  const gradeOffset = isBoss ? 2 : 0;
+  // 헤더: 1추(최고)~5추(최저) 표기
   const tierProbs = [5,4,3,2,1].map(t => {
     const p = prob[t-1];
-    const label = `${t+gradeOffset}추`;
+    const label = `${6-t}추`; // t5→1추, t4→2추, t1→5추
     const probStr = p > 0 ? `${(p*100).toFixed(0)}%` : '—';
     const probCls = p > 0 ? 'flame-th-prob' : 'flame-th-prob flame-t--zero';
     return `<th><span class="${p===0?'flame-t--zero':''}">${label}</span><br><span class="${probCls}">${probStr}</span></th>`;
@@ -282,7 +281,7 @@ function initAddOption() {
       <select class="sel" id="flameGoalOpt${i}"><option value="none">— 없음 —</option></select>
       <div style="display:flex;align-items:center;gap:6px">
         <select class="sel" id="flameGoalTier${i}" style="width:90px">
-          ${[1,2,3,4,5].map(t=>`<option value="${t}"${t===3?' selected':''}>${8-t}추</option>`).join('')}
+          ${[1,2,3,4,5].map(t=>`<option value="${t}"${t===1?' selected':''}>${t}추</option>`).join('')}
         </select>
         <span style="font-size:.8rem;color:var(--text-sub)">옵션</span>
       </div>
