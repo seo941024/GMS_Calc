@@ -372,14 +372,10 @@ function initStatOCR() {
     _fields = buildFields(_jtIdx, parsed);
     const tbody = _fields.map((f,i) => {
       const isManual = f.note === '수동 입력';
-      const displayVal = isManual ? '' : (f.val || '');
       return `
       <tr>
         <td class="stat-lbl">${f.label}</td>
-        <td>${isManual
-          ? `<span style="font-size:.75rem;color:var(--text-sub)">수동 입력</span>`
-          : `<input class="inp stat-val-inp" data-i="${i}" value="${displayVal}" placeholder="—"/>`
-        }</td>
+        <td><input class="inp stat-val-inp" data-i="${i}" value="${f.val||''}" placeholder="${isManual?'수동 입력':'—'}"/></td>
       </tr>`;
     }).join('');
     document.getElementById('statResultTable').innerHTML = `
