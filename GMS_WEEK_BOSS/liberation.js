@@ -33,14 +33,15 @@ function genTraceSums() {
   const mult = genState.pass ? GENESIS_PASS_MULT : 1;
   let weekly = 0, weeklyFirst = 0;
   for (const id in TRACE_YIELD) {
-    if (id === 'blackmage') continue;
     const sel  = genState.sel[id] || {};
     const diff = sel.diff || 'none';
     if (diff === 'none') continue;
     const party = Math.max(1, sel.party || 1);
-    const yld = Math.floor((TRACE_YIELD[id][diff] || 0) * mult / party);
+    const raw = Math.floor((TRACE_YIELD[id][diff] || 0) * mult / party);
+    // 검마는 월간 보스 → 주간 환산 (÷4)
+    const yld = id === 'blackmage' ? Math.floor(raw / 4) : raw;
     weekly += yld;
-    if (!sel.cleared) weeklyFirst += yld; // 금주 격파한 보스는 1주차 제외
+    if (!sel.cleared) weeklyFirst += yld;
   }
   return { weekly, weeklyFirst, mult };
 }
