@@ -1496,3 +1496,4 @@ body.sidebar-open .hamburger span:nth-child(3) { transform: translateY(-6px) rot
 .flame-tbl .flame-avg { color: #fbbf24; font-weight: 600; }
 .flame-t--zero { color: var(--text-sub); opacity: .35; }
 .flame-th-prob { font-size: .72rem; font-weight: 400; color: var(--text-sub); }
+.flame-type-icon { width: 22px; height: 22px; object-fit: contain; vertical-align: middle; margin-right: 4px; }

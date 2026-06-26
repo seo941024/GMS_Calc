@@ -3,14 +3,9 @@
 ═══════════════════════════════════════════════ */
 
 const FLAME_TYPES = {
-  POWERFUL:      { label: '강력한 환생의 불꽃', prob: [0.20, 0.30, 0.36, 0.14, 0.00] },
-  ETERNAL:       { label: '영원한 환생의 불꽃', prob: [0.00, 0.29, 0.45, 0.25, 0.01] },
-  ABYSS:         { label: '심연의 환생의 불꽃', prob: [0.00, 0.00, 0.63, 0.34, 0.03] },
-  DROP:          { label: '몬스터 드랍',         prob: [0.25, 0.30, 0.30, 0.14, 0.01] },
-  CRAFT_MASTER:  { label: '장인 제작',           prob: [0.15, 0.30, 0.40, 0.14, 0.01] },
-  CRAFT_MEISTER: { label: '명장 제작',           prob: [0.00, 0.19, 0.50, 0.30, 0.01] },
-  FUSE_MASTER:   { label: '장인 합성',           prob: [0.00, 0.40, 0.45, 0.14, 0.01] },
-  FUSE_MEISTER:  { label: '명장 합성',           prob: [0.00, 0.30, 0.50, 0.19, 0.01] },
+  POWERFUL: { label: '강환불', img: 'images/icons/flame_powerful.png', prob: [0.20, 0.30, 0.36, 0.14, 0.00] },
+  ETERNAL:  { label: '영환불', img: 'images/icons/flame_eternal.png',  prob: [0.00, 0.29, 0.45, 0.25, 0.01] },
+  ABYSS:    { label: '심환불', img: 'images/icons/flame_abyss.png',    prob: [0.00, 0.00, 0.63, 0.34, 0.03] },
 };
 
 const FLAME_OPTIONS_ARMOR  = ['STR','DEX','INT','LUK','STR+DEX','STR+INT','STR+LUK','DEX+INT','DEX+LUK','INT+LUK','HP','ATTACK','MAGIC ATK','ALL%'];
@@ -231,8 +226,10 @@ function initAddOption() {
   const sec = document.getElementById('sec-addoption');
   if (!sec) return;
 
-  const flameTypeButtons = Object.entries(FLAME_TYPES).map(([key, { label }]) =>
-    `<button class="sf-toggle${key==='POWERFUL'?' active':''}" data-val="${key}">${label}</button>`
+  const flameTypeButtons = Object.entries(FLAME_TYPES).map(([key, { label, img }]) =>
+    `<button class="sf-toggle${key==='POWERFUL'?' active':''}" data-val="${key}">
+      <img src="${img}" class="flame-type-icon" onerror="this.style.display='none'" />${label}
+    </button>`
   ).join('');
 
   const goalRows = [1,2,3].map(i => `
@@ -243,7 +240,7 @@ function initAddOption() {
         <select class="sel" id="flameGoalTier${i}" style="width:70px">
           ${[1,2,3,4,5].map(t=>`<option value="${t}"${t===3?' selected':''}>${t}</option>`).join('')}
         </select>
-        <span style="font-size:.8rem;color:var(--text-sub)">이상</span>
+        <span style="font-size:.8rem;color:var(--text-sub)">옵션</span>
       </div>
     </div>`).join('');
 
@@ -257,7 +254,7 @@ function initAddOption() {
         <div>
           <div class="card__title">장비 종류</div>
           <div class="sf-toggle-group" id="flameEquipGroup" style="margin-top:8px">
-            <button class="sf-toggle active" data-val="armor">비무기</button>
+            <button class="sf-toggle active" data-val="armor">장비</button>
             <button class="sf-toggle" data-val="weapon">무기</button>
           </div>
         </div>
@@ -270,7 +267,7 @@ function initAddOption() {
           <div class="field" style="justify-content:flex-end;padding-top:22px">
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.85rem;color:var(--text-sub)">
               <input type="checkbox" id="flameBoss" />
-              보스 드랍
+              보스 장비
             </label>
           </div>
         </div>
