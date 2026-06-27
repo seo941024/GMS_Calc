@@ -542,7 +542,7 @@ const JOB_HEAD_ASSET_NAMES = {
   'Khali':'Khalie',
   'Kaiser':'Kasier',
   'Mo Xuan':'Moxuan',
-  'Mikhail':'Mikhail',
+  'Mikhail':'Michile',
 };
 const SERVER_ASSET_EXT = { Bera:'webp', Scania:'webp', Kronos:'png', Hyperion:'png' };
 
