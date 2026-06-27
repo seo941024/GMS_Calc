@@ -67,20 +67,27 @@ function calcResult() {
   const remaining  = Math.max(0, GENESIS_TARGET - totalSpent);
   const pct        = Math.min(100, Math.round(totalSpent / GENESIS_TARGET * 100));
 
-  // 이번 주 수입 (cleared 제외) / 다음 주부터 수입 (매주 full)
-  const effectiveThis = thisWeekly + thisMonthly / 4;
-  const effectiveFull = fullWeekly + fullMonthly / 4;
+  // 검은마법사는 월 1회 — 1주차에 thisMonthly 전액, 이후 매 4주마다 fullMonthly
+  // 1주차: 이번주 주간보스 + 이번달 검마(미격파 시)
+  const week1income = thisWeekly + thisMonthly;
 
   let daysLeft = null, targetDateStr = '—';
 
   if (remaining <= 0) {
     daysLeft = 0;
     targetDateStr = '이미 달성!';
-  } else if (effectiveFull > 0) {
-    // 1주차: 이번 주 수입으로 얼마나 채우는지
-    const afterWeek1 = Math.max(0, remaining - effectiveThis);
-    const extraWeeks = afterWeek1 <= 0 ? 0 : Math.ceil(afterWeek1 / effectiveFull);
-    daysLeft = (1 + extraWeeks) * 7;
+  } else if (fullWeekly > 0 || fullMonthly > 0) {
+    const afterWeek1 = Math.max(0, remaining - week1income);
+    if (afterWeek1 <= 0) {
+      // 이번 주 안에 해방
+      daysLeft = 7;
+    } else {
+      // 2주차부터: 주간보스만 (검마는 4주 후 다시)
+      // 단순화: 주당 fullWeekly + fullMonthly/4 사용
+      const weeklyRate = fullWeekly + fullMonthly / 4;
+      const extraWeeks = Math.ceil(afterWeek1 / weeklyRate);
+      daysLeft = (1 + extraWeeks) * 7;
+    }
     const start = new Date(genState.startDate || nextThursday());
     start.setDate(start.getDate() + daysLeft);
     targetDateStr = `${start.getFullYear()}년 ${String(start.getMonth()+1).padStart(2,'0')}월 ${String(start.getDate()).padStart(2,'0')}일`;
