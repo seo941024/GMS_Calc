@@ -111,7 +111,7 @@ function initStatOCR() {
   sec.innerHTML = `
     <div class="sec-head"><h2 class="sec-title">환산주스탯 도우미</h2></div>
     <div class="sf-tabs" style="margin-bottom:12px">
-      <button class="sf-tab active" id="statTabOcr">자동 추출 (OCR)</button>
+      <button class="sf-tab active" id="statTabOcr">자동 추출</button>
       <button class="sf-tab" id="statTabManual">수동 입력</button>
     </div>
     <hr class="sec-sep"/>
@@ -158,7 +158,7 @@ function initStatOCR() {
       <!-- 우측 결과 -->
       <div class="card" style="min-width:0;overflow-x:auto">
         <div class="card__title">추출 결과 <span style="font-size:.72rem;font-weight:400;color:var(--text-sub)">(수정 가능)</span></div>
-        <div id="statResultTable" style="margin-top:10px"><p class="empty">OCR 실행 또는 수동 입력을 시작하세요.</p></div>
+        <div id="statResultTable" style="margin-top:10px"><p class="empty">정보값 자동입력을 클릭, 또는 수동입력을 시작하세요.</p></div>
       </div>
     </div>`;
 
@@ -168,7 +168,7 @@ function initStatOCR() {
     sec.querySelector('#statTabOcr').classList.add('active');
     document.getElementById('statPanelOcr').style.display = '';
     document.getElementById('statPanelManual').style.display = 'none';
-    document.getElementById('statResultTable').innerHTML = '<p class="empty">OCR 실행 또는 수동 입력을 시작하세요.</p>';
+    document.getElementById('statResultTable').innerHTML = '<p class="empty">정보값 자동입력을 클릭, 또는 수동입력을 시작하세요.</p>';
     document.getElementById('statCopyBtn').disabled = true;
   });
   sec.querySelector('#statTabManual').addEventListener('click', () => {
