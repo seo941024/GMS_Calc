@@ -102,9 +102,10 @@ function initStatOCR() {
   if (!sec) return;
 
   let _parsed = {}, _fields = [], _jtIdx = 0;
-  let _img = null; // 원본 Image 객체
-  let _crop = null; // {x,y,w,h} 크롭 영역 (canvas 픽셀 기준)
+  let _img = null;
+  let _crop = null;
   let _dragging = false, _dragStart = null;
+  let _worker = null;
 
   const jobOpts = STAT_JOB_TYPES.map((jt,i)=>`<option value="${i}">${jt.label}</option>`).join('');
 
@@ -340,20 +341,21 @@ function initStatOCR() {
         });
       }
 
-      // Tesseract v5: worker.setParameters()로 파라미터 적용
-      const worker = await Tesseract.createWorker('eng', 1, {
-        logger: m => {
-          if (m.status === 'recognizing text')
-            status.textContent = `텍스트 인식 중... ${Math.round(m.progress*100)}%`;
-        },
-      });
-      await worker.setParameters({
-        tessedit_pageseg_mode: '6',
-        tessedit_char_whitelist: '0123456789.%ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz +/-:',
-        preserve_interword_spaces: '1',
-      });
-      const { data: { text } } = await worker.recognize(ocrCanvas);
-      await worker.terminate();
+      if (!_worker) {
+        status.textContent = '인식 엔진 초기화 중...';
+        _worker = await Tesseract.createWorker('eng', 1);
+        await _worker.setParameters({
+          tessedit_pageseg_mode: '6',
+          tessedit_char_whitelist: '0123456789.%ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz +/-:',
+          preserve_interword_spaces: '1',
+        });
+      }
+
+      _worker.setOptions({ logger: m => {
+        if (m.status === 'recognizing text')
+          status.textContent = `텍스트 인식 중... ${Math.round(m.progress*100)}%`;
+      }});
+      const { data: { text } } = await _worker.recognize(ocrCanvas);
 
       _parsed = parseStatWindow(text);
       renderTable(_parsed);

@@ -525,7 +525,7 @@ const JOB_HEAD_ASSET_NAMES = {
   'Dual Blade':'DualBlade',
   'Buccaneer':'Viper',
   'Corsair':'Captain',
-  'Cannoneer':'CannonShoter',
+  'Cannoneer':'CannonShooter',
   'Dawn Warrior':'SoulMaster',
   'Blaze Wizard':'FlameWizard',
   'Wind Archer':'Windbreaker',
