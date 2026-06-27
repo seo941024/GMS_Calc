@@ -341,22 +341,19 @@ function initStatOCR() {
         });
       }
 
-      if (!_worker) {
-        status.textContent = '인식 엔진 초기화 중...';
-        _worker = await Tesseract.createWorker('eng', 1, {
-          logger: m => {
-            if (m.status === 'recognizing text')
-              status.textContent = `텍스트 인식 중... ${Math.round(m.progress*100)}%`;
-          },
-        });
-        await _worker.setParameters({
-          tessedit_pageseg_mode: '6',
-          tessedit_char_whitelist: '0123456789.%ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz +/-:',
-          preserve_interword_spaces: '1',
-        });
-      }
-
-      const { data: { text } } = await _worker.recognize(ocrCanvas);
+      const worker = await Tesseract.createWorker('eng', 1, {
+        logger: m => {
+          if (m.status === 'recognizing text')
+            status.textContent = `텍스트 인식 중... ${Math.round(m.progress*100)}%`;
+        },
+      });
+      await worker.setParameters({
+        tessedit_pageseg_mode: '6',
+        tessedit_char_whitelist: '0123456789.%ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz +/-:',
+        preserve_interword_spaces: '1',
+      });
+      const { data: { text } } = await worker.recognize(ocrCanvas);
+      await worker.terminate();
 
       _parsed = parseStatWindow(text);
       renderTable(_parsed);
