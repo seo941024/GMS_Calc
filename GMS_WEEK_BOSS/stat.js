@@ -61,14 +61,12 @@ function buildFields(jtIdx, parsed) {
   });
 
   // 공격력/마력 그룹 (maplescouter 9·10·11번 = 주/부스탯 다음 칸, 기본스공 전).
-  // INT 직업군(third:'MATK')은 마력, 나머지는 공격력. 기본수치는 OCR값, %는 수동 입력.
+  // INT 직업군(third:'MATK')은 마력, 나머지는 공격력. 전부 수동 입력(스샷에 분해값이 안 나옴).
   // 제논(3스탯)은 9·10·11이 3차 스탯이라 충돌 → 그룹 생략.
   const apRows = [];
   if (statKeys.length <= 2) {
-    const isMatk = jt.third === 'MATK';
-    const apLabel = isMatk ? '마력' : '공격력';
-    const apKey   = isMatk ? 'MATK' : 'ATK';
-    apRows.push({ label: `${apLabel} 기본수치`, key: apKey, idx: 9,  note: '합산값' });
+    const apLabel = jt.third === 'MATK' ? '마력' : '공격력';
+    apRows.push({ label: `${apLabel} 기본수치`, key: null, idx: 9,  val: '', note: '수동 입력' });
     apRows.push({ label: `${apLabel} % 수치`,  key: null,  idx: 10, val: '', note: '수동 입력' });
     apRows.push({ label: `${apLabel} % 미적용`,key: null,  idx: 11, val: '', note: '수동 입력' });
   }
