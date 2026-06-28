@@ -7,7 +7,7 @@
       "runtimeArgs": ["serve.js"],
       "port": 3001,
       "autoPort": true,
-      "cwd": "C:\\Users\\AISW_203_106\\Desktop\\GMS_Calc\\GMS_WEEK_BOSS"
+      "cwd": "C:\\Users\\seo94\\Desktop\\GMS_Calc\\GMS_WEEK_BOSS"
     }
   ]
 }

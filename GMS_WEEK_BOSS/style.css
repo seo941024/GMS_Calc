@@ -1536,3 +1536,146 @@ body.sidebar-open .hamburger span:nth-child(3) { transform: translateY(-6px) rot
 .stat-val-inp { width: 120px; padding: 4px 8px; font-size: .82rem; }
 .stat-warn { border-color: #f87171 !important; background: rgba(248,113,113,.08) !important; }
 tbody tr:hover { background: rgba(139,92,246,.05); }
+
+/* ════════════════════════════════════════════════════════
+   ✨ PREMIUM POLISH LAYER — 전부 transform/opacity 기반
+   (background-position·box-shadow 무한 리페인트 없음 = 무렉)
+   ════════════════════════════════════════════════════════ */
+
+/* ── 1. 떠다니는 오로라 블롭 (GPU 컴포지터에서만 처리) ── */
+.aurora {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  overflow: hidden; contain: strict;
+}
+.aurora__blob {
+  position: absolute; border-radius: 50%;
+  filter: blur(90px); will-change: transform;
+  transform: translateZ(0);
+}
+.aurora__blob--1 {
+  width: 48vmax; height: 48vmax; left: -10vmax; top: -12vmax;
+  background: radial-gradient(circle, rgba(124,58,237,.55) 0%, transparent 70%);
+  animation: drift1 28s ease-in-out infinite;
+}
+.aurora__blob--2 {
+  width: 42vmax; height: 42vmax; right: -8vmax; bottom: -10vmax;
+  background: radial-gradient(circle, rgba(192,38,163,.42) 0%, transparent 70%);
+  animation: drift2 34s ease-in-out infinite;
+}
+.aurora__blob--3 {
+  width: 36vmax; height: 36vmax; left: 42%; top: 38%;
+  background: radial-gradient(circle, rgba(246,168,35,.20) 0%, transparent 70%);
+  animation: drift3 40s ease-in-out infinite;
+}
+@keyframes drift1 { 0%,100%{transform:translate3d(0,0,0)} 50%{transform:translate3d(7vmax,5vmax,0)} }
+@keyframes drift2 { 0%,100%{transform:translate3d(0,0,0)} 50%{transform:translate3d(-6vmax,-4vmax,0)} }
+@keyframes drift3 { 0%,100%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(-5vmax,3vmax,0) scale(1.18)} }
+
+/* ── 2. 미세 그레인 텍스처 (정적, 페인트 1회) ── */
+.grain {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+/* ── 3. 헤더 글래스모피즘 ── */
+.header {
+  background: linear-gradient(180deg, rgba(18,12,38,.82), rgba(8,5,20,.72)) !important;
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border-bottom: 1px solid transparent !important;
+  border-image: linear-gradient(90deg, transparent, rgba(167,139,250,.5), rgba(246,199,68,.35), transparent) 1 !important;
+}
+.header__timer {
+  position: relative; overflow: hidden;
+}
+.header__timer::after {
+  content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.28), transparent);
+  transform: skewX(-18deg); animation: sheen 5.5s ease-in-out infinite;
+}
+@keyframes sheen { 0%,100%{transform:translateX(0) skewX(-18deg);opacity:0} 12%{opacity:1} 28%{transform:translateX(420%) skewX(-18deg);opacity:0} }
+
+/* ── 4. 사이드바 글래스 ── */
+.sidebar {
+  background: linear-gradient(180deg, rgba(14,9,30,.78), rgba(6,4,16,.7)) !important;
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
+
+/* ── 5. 카드: 상단 그라디언트 액센트 + 입체 호버 ── */
+.card { position: relative; isolation: isolate; }
+.card::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(167,139,250,.85), rgba(246,199,68,.7), transparent);
+  opacity: .55; transition: opacity .3s; z-index: 2;
+}
+.card:hover::after { opacity: 1; }
+
+/* ── 6. 사이드바 nav 활성: background-position 애니 → transform 스윕(컴포지터) ── */
+.sb-nav__item.active {
+  animation: none !important;
+  background-image: linear-gradient(90deg, rgba(246,199,68,.30), rgba(167,139,250,.26)) !important;
+  background-size: auto !important;
+  position: relative; overflow: hidden;
+}
+.sb-nav__item.active::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.16) 50%, transparent 70%);
+  transform: translateX(-100%); animation: navsweep 4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes navsweep { 0%,100%{transform:translateX(-100%)} 55%,70%{transform:translateX(100%)} }
+
+/* ── 7. 제네시스 패스 카드: background-position 애니 → transform 스윕 ── */
+.gen-cfg-card--pass.on {
+  animation: none !important; background-size: auto !important;
+  position: relative; overflow: hidden;
+}
+.gen-cfg-card--pass.on::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 35%, rgba(255,255,255,.18) 50%, transparent 65%);
+  transform: translateX(-100%); animation: navsweep 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── 8. 활성 캐릭터 카드: box-shadow 펄스 → opacity 펄스 글로우(컴포지터) ── */
+.char-card.active, .cg-card--active {
+  animation: none !important;
+  box-shadow: 0 0 0 1px #f5c842, 0 4px 18px rgba(0,0,0,.5) !important;
+  position: relative;
+}
+.char-card.active::before, .cg-card--active::before {
+  content: ''; position: absolute; inset: -2px; border-radius: inherit; z-index: -1;
+  background: linear-gradient(135deg, rgba(245,200,66,.9), rgba(167,139,250,.7));
+  filter: blur(9px); opacity: .5; will-change: opacity;
+  animation: glowpulse 2.8s ease-in-out infinite;
+}
+@keyframes glowpulse { 0%,100%{opacity:.32} 50%{opacity:.7} }
+
+/* ── 9. 버튼 클릭감 강화 (hover/active만, 무한 없음) ── */
+.sbtn--primary, .sbtn--add {
+  position: relative; overflow: hidden;
+}
+.sbtn--primary::after, .sbtn--add::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 40%, rgba(255,255,255,.25) 50%, transparent 60%);
+  transform: translateX(-120%); transition: transform .5s ease;
+}
+.sbtn--primary:hover::after, .sbtn--add:hover::after { transform: translateX(120%); }
+.hbtn:active, .sbtn:active { transform: translateY(1px) scale(.97); }
+
+/* ── 10. 섹션 타이틀 글로우 강화 ── */
+.sec-title { text-shadow: 0 0 22px rgba(167,139,250,.25); }
+
+/* ── 11. 저성능/모션축소 환경: 드리프트·스윕 전부 정지 ── */
+@media (hover:none), (max-width:768px), (prefers-reduced-motion:reduce) {
+  .aurora__blob { animation: none !important; }
+  .header__timer::after,
+  .sb-nav__item.active::after,
+  .gen-cfg-card--pass.on::after,
+  .char-card.active::before,
+  .cg-card--active::before { animation: none !important; }
+  .header, .sidebar { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .grain { display: none; }
+}
