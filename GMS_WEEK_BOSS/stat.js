@@ -38,7 +38,7 @@ function parseStatWindow(rawText) {
     NORMAL_DMG:   get(/NORMAL ENEMY DAMAGE[^\d\n]*([\d.]+)\s*%/i),
     CRIT_RATE:    get(/CRITICAL RATE[^\d\n]*([\d.]+)\s*%/i),
     CRIT_DMG:     get(/CRITICAL DAMAGE[^\d\n]*([\d.]+)\s*%/i),
-    CD_SEC:       get(/DOWN REDUCTION[^\d\n]*([\d.]+)\s*s?e?c/i),
+    CD_SEC:       get(/DOWN REDUCTION[^\d\n]*?(\d+?)\s*(?:s|5)ec/i),  // "2sec"→2, OCR깨짐 "25ec"→2
     CD_PCT:       get(/DOWN REDUCTION[^\/\n]*\/\s*([\d.]+)/i),
     BUFF_DUR:     get(/BUFF DURATION[^\d\n]*([\d.]+)\s*%/i),
     CD_NOT:       get(/DOWN [HN]OT APPLIED[^\d\n]*([\d.]+)\s*%/i),
