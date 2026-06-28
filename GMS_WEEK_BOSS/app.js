@@ -169,8 +169,9 @@ function updateCrystalBar() {
   if (elCW) elCW.textContent = totalW;
   const elCM = document.getElementById('totalCrystalMonthly');
   if (elCM) elCM.textContent = totalM;
-  const weekTotal  = state.chars.reduce((s, c) => s + charWeeklyMeso(c), 0);
-  const monthTotal = state.chars.reduce((s, c) => s + charMonthlyMeso(c), 0) - rentalMonthlyCost();
+  // 대여 비용은 캐릭터별로 합산해서 차감
+  const weekTotal  = state.chars.reduce((s, c) => s + charWeeklyMeso(c)  - rentalWeeklyCost(c),  0);
+  const monthTotal = state.chars.reduce((s, c) => s + charMonthlyMeso(c) - rentalMonthlyCost(c), 0);
   const elW = document.getElementById('totalWeekMeso');
   if (elW) elW.textContent = fmtMeso(weekTotal);
   const elM = document.getElementById('totalMonthMeso');
@@ -237,6 +238,7 @@ function renderBossTable() {
     cp.innerHTML = `<span class="cc-item"><img src="images/icons/weekly.webp" alt="">0개</span><span class="cc-item"><img src="images/icons/monthly.webp" alt="">0개</span>`;
     tb.innerHTML = `<tr><td colspan="4" class="empty">왼쪽에서 캐릭터를 선택하세요.</td></tr>`;
     document.getElementById('weeklyTotal').textContent = '0 메소';
+    initRentalSlots();
     return;
   }
 
@@ -309,6 +311,9 @@ function renderBossTable() {
   }
   if (monthSubEl) monthSubEl.textContent = `(주${resets}회 기준)`;
 
+  // 활성 캐릭터의 대여 슬롯·수요일 체크 동기화
+  initRentalSlots();
+
   // 난이도 dpill 클릭 → 토글
   tb.querySelectorAll('.diff-btns .dpill').forEach(pill => {
     pill.addEventListener('click', () => {
@@ -365,26 +370,33 @@ const RENTAL_ITEMS = [
   { id:'beryl',   img:'images/icons/Red_Beryl_Totem.png',            cost: 100_000_000 },
 ];
 
-function getRentalState() {
-  try { return JSON.parse(localStorage.getItem('rental') || '{"slots":[],"wed":false}'); }
-  catch { return { slots: [], wed: false }; }
+// 대여는 캐릭터별로 저장 (ch.rental). 인자 없으면 활성 캐릭터 기준.
+function getRentalState(ch = state.chars[state.activeChar]) {
+  if (!ch) return { slots: [], wed: false };
+  if (!ch.rental || typeof ch.rental !== 'object') ch.rental = { slots: [], wed: false };
+  if (!Array.isArray(ch.rental.slots)) ch.rental.slots = [];
+  return ch.rental;
 }
-function saveRentalState(s) { localStorage.setItem('rental', JSON.stringify(s)); }
+function saveRentalState(s, ch = state.chars[state.activeChar]) {
+  if (!ch) return;
+  ch.rental = s;
+  save();
+}
 
-function rentalWeeklyCost() {
-  const s = getRentalState();
-  return RENTAL_ITEMS.reduce((t, item, i) => t + (s.slots.includes(item.id) ? item.cost : 0), 0);
+function rentalWeeklyCost(ch = state.chars[state.activeChar]) {
+  const s = getRentalState(ch);
+  return RENTAL_ITEMS.reduce((t, item) => t + (s.slots.includes(item.id) ? item.cost : 0), 0);
 }
-function rentalMonthlyCost() {
-  const s = getRentalState();
-  const weekly = rentalWeeklyCost();
-  return weekly * (s.wed ? 2 : 4);
+function rentalMonthlyCost(ch = state.chars[state.activeChar]) {
+  const s = getRentalState(ch);
+  return rentalWeeklyCost(ch) * (s.wed ? 2 : 4);
 }
 
 function initRentalSlots() {
   const container = document.getElementById('rentalSlots');
   if (!container) return;
-  const s = getRentalState();
+  const ch = state.chars[state.activeChar];
+  const s = getRentalState(ch);
   container.innerHTML = '';
   RENTAL_ITEMS.forEach(item => {
     const slot = document.createElement('div');
@@ -392,6 +404,7 @@ function initRentalSlots() {
     slot.dataset.id = item.id;
     slot.innerHTML = `<img src="${item.img}" alt="${item.id}" onerror="this.style.opacity='.3'">`;
     slot.addEventListener('click', () => {
+      if (!state.chars[state.activeChar]) return;
       const rs = getRentalState();
       const idx = rs.slots.indexOf(item.id);
       if (idx >= 0) rs.slots.splice(idx, 1); else rs.slots.push(item.id);
@@ -401,6 +414,9 @@ function initRentalSlots() {
     });
     container.appendChild(slot);
   });
+  // 수요일 체크박스도 활성 캐릭터 기준으로 동기화
+  const wedCb = document.getElementById('rentalWed');
+  if (wedCb) wedCb.checked = s.wed;
   updateRentalTotals();
 }
 
@@ -436,9 +452,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initRentalSlots();
   const wedCb = document.getElementById('rentalWed');
   if (wedCb) {
-    const s = getRentalState();
-    wedCb.checked = s.wed;
     wedCb.addEventListener('change', () => {
+      if (!state.chars[state.activeChar]) return;
       const rs = getRentalState();
       rs.wed = wedCb.checked;
       saveRentalState(rs);
@@ -915,6 +930,21 @@ document.addEventListener('click', () => fontDdMenu.classList.remove('open'));
 
 /* ── 초기화 ── */
 load();
+
+// 구버전: 대여가 전역(localStorage 'rental')이었음 → 첫 캐릭터로 1회 이전 후 제거
+(function migrateRental() {
+  const legacy = localStorage.getItem('rental');
+  if (!legacy) return;
+  try {
+    const s = JSON.parse(legacy);
+    if (state.chars[0] && !state.chars[0].rental && (s.slots?.length || s.wed)) {
+      state.chars[0].rental = { slots: Array.isArray(s.slots) ? s.slots : [], wed: !!s.wed };
+      save();
+    }
+  } catch {}
+  localStorage.removeItem('rental');
+})();
+
 applyRegionUI();
 applyFont(localStorage.getItem(FONT_KEY) || '8bit');
 renderCharList();
