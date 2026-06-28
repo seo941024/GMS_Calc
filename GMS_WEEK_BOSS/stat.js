@@ -39,7 +39,7 @@ function parseStatWindow(rawText) {
     CRIT_RATE:    get(/CRITICAL RATE[^\d\n]*([\d.]+)\s*%/i),
     CRIT_DMG:     get(/CRITICAL DAMAGE[^\d\n]*([\d.]+)\s*%/i),
     CD_SEC:       get(/REDUCTION[^\/\n]*?([0-6])/i),       // "/" 앞 첫 0~6 숫자 = 초 (sec 오인식 무관)
-    CD_PCT:       get(/REDUCTION[^\/\n]*\/\s*([\d.]+)/i),  // "/" 뒤 숫자 = %
+    CD_PCT:       get(/REDUCTION[^\n]*?([\d.]+)\s*%/i),    // 줄에서 % 앞 첫 숫자 ("/" 오인식·누락 무관)
     BUFF_DUR:     get(/BUFF DURATION[^\d\n]*([\d.]+)\s*%/i),
     CD_NOT:       get(/DOWN [HN]OT APPLIED[^\d\n]*([\d.]+)\s*%/i),
     IGNORE_ELEM:  get(/IGNORE ELEMENTAL RESISTANCE[^\d\n]*([\d.]+)\s*%/i),
@@ -295,18 +295,22 @@ function initStatOCR() {
     const status = document.getElementById('statOcrStatus');
     btn.disabled = true;
 
-    // 크롭 영역 추출 → 3배 업스케일 + 반전 이진화 전처리
+    // 크롭 영역 추출 → 업스케일 + 반전 이진화 전처리
     const srcW = (_crop && _crop.w > 10) ? _crop.w : _img.naturalWidth;
     const srcH = (_crop && _crop.h > 10) ? _crop.h : _img.naturalHeight;
     const srcX = (_crop && _crop.w > 10) ? _crop.x : 0;
     const srcY = (_crop && _crop.h > 10) ? _crop.y : 0;
 
-    const SCALE = 3;
+    // 작은 캡쳐일수록 더 키워서 글자 높이를 확보 (Tesseract는 큰 글자에 강함)
+    // 목표: 가로 약 1600px 이상, 최소 4배
+    const SCALE = Math.max(4, Math.min(8, Math.ceil(1600 / srcW)));
     const ocrCanvas = document.createElement('canvas');
     ocrCanvas.width  = srcW * SCALE;
     ocrCanvas.height = srcH * SCALE;
     const ctx = ocrCanvas.getContext('2d');
-    ctx.imageSmoothingEnabled = false;
+    // 부드러운 보간으로 업스케일 → 이진화 시 가장자리가 덜 깨짐
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(_img, srcX, srcY, srcW, srcH, 0, 0, ocrCanvas.width, ocrCanvas.height);
 
     // 전처리: GMS 스탯창 (어두운 배경 + 흰색/노란색 텍스트)
