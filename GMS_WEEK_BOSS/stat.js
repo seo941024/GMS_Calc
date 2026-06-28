@@ -325,19 +325,44 @@ function initStatOCR() {
     ctx.drawImage(_img, srcX, srcY, srcW, srcH, 0, 0, ocrCanvas.width, ocrCanvas.height);
 
     // 전처리: GMS 스탯창 (어두운 배경 + 흰색/노란색 텍스트)
-    // 밝거나 채도 높은 픽셀(글자) → 검정, 어두운 픽셀(배경) → 흰색
+    // Step 1: 그레이스케일 + 대비 강화
     const imgData = ctx.getImageData(0, 0, ocrCanvas.width, ocrCanvas.height);
     const d = imgData.data;
+    const W = ocrCanvas.width, H = ocrCanvas.height;
+    const gray2d = new Float32Array(W * H);
     for (let i = 0; i < d.length; i += 4) {
       const r = d[i], g = d[i+1], b = d[i+2];
       const gray = 0.299 * r + 0.587 * g + 0.114 * b;
       const max = Math.max(r, g, b);
       const min = Math.min(r, g, b);
       const saturation = max === 0 ? 0 : (max - min) / max;
-      // 밝은 픽셀(gray>140) 또는 채도 높은 픽셀(노란색/주황색 텍스트) → 글자
-      const isText = gray > 140 || (saturation > 0.3 && max > 120);
-      const bin = isText ? 0 : 255;
+      // 채도 높은 픽셀(노란/주황 텍스트)은 밝기 보정해서 글자로 인식
+      const boosted = (saturation > 0.25 && max > 100) ? Math.min(255, gray * 1.4) : gray;
+      gray2d[i / 4] = boosted;
+    }
+    // Step 2: 3×3 언샤프 마스크로 선명화 (8의 고리 보존)
+    const sharp = new Float32Array(W * H);
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const idx = y * W + x;
+        // 5px 블러 근사 (인접 픽셀 평균)
+        let sum = 0, cnt = 0;
+        for (let dy = -2; dy <= 2; dy++) {
+          for (let dx = -2; dx <= 2; dx++) {
+            const ny = y+dy, nx = x+dx;
+            if (ny>=0 && ny<H && nx>=0 && nx<W) { sum += gray2d[ny*W+nx]; cnt++; }
+          }
+        }
+        const blur = sum / cnt;
+        // 언샤프: original + amount*(original - blur)
+        sharp[idx] = Math.min(255, Math.max(0, gray2d[idx] + 1.5 * (gray2d[idx] - blur)));
+      }
+    }
+    // Step 3: 이진화 (임계값 125 — 8의 고리까지 살림)
+    for (let i = 0; i < d.length; i += 4) {
+      const bin = sharp[i / 4] > 125 ? 0 : 255;
       d[i] = d[i+1] = d[i+2] = bin;
+      d[i+3] = 255;
     }
     ctx.putImageData(imgData, 0, 0);
 

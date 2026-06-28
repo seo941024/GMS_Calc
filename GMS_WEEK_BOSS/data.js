@@ -4,6 +4,7 @@
 
 /* ── 주보 ── */
 const BOSS_DATA = [
+  { id:'jupiter',    name:'유피테르',            diffs:{normal:0,hard:0},                                                               maxParty:3, minLevel:295, img:'images/bosses/jupiter.webp' },
   { id:'baldrix',    name:'발드릭스',            diffs:{normal:2_800_000_000,hard:4_200_000_000},                                        maxParty:3, minLevel:290, img:'images/bosses/baldrix.webp' },
   { id:'limbo',      name:'림보',                diffs:{normal:2_100_000_000,hard:3_745_000_000},                                        maxParty:3, minLevel:285, img:'images/bosses/limbo.webp' },
   { id:'hyungseong', name:'찬란한 흉성',         diffs:{normal:1_452_000_000,hard:3_990_000_000},                                        maxParty:3, minLevel:280, img:'images/bosses/hyungseong.webp' },
@@ -225,6 +226,8 @@ function sfCost(itemLevel, star) {
       - 아케인포스: 요구량의 150% 도달 시 데미지 1.5배
       - 어센틱포스: 요구량 +10마다 +5%, 최대 125% */
 const BOSS_HP_TABLE = [
+  {name:'유피테르',           diff:'노말',     hp:102_600_000,  lv:295, pdr:380, force:810,  ftype:'auth'},
+  {name:'유피테르',           diff:'하드',     hp:494_000_000,  lv:295, pdr:380, force:810,  ftype:'auth'},
   {name:'발드릭스',           diff:'노말',     hp:90_600_000,   lv:290, pdr:380, force:700,  ftype:'auth'},
   {name:'발드릭스',           diff:'하드',     hp:203_400_000,  lv:290, pdr:380, force:700,  ftype:'auth'},
   {name:'림보',               diff:'노말',     hp:64_800_000,   lv:285, pdr:380, force:500,  ftype:'auth'},
@@ -335,6 +338,39 @@ const GENESIS_QUESTS = [
 const GENESIS_TARGET = 5500;
 const TRACE_HOLD_MAX = 3000;
 const GENESIS_PASS_MULT = 3;     // 제네시스 패스: 흔적 획득 3배
+
+/* ─── 데스티니 해방 ─── */
+const DESTINY_RESOLVE_YIELD = {
+  seren:      { 노말:6,   하드:80 },
+  kalos:      { 노말:10,  하드:70,  카오스:400 },
+  daejuk:     { 노말:20,  하드:120, 익스트림:500 },
+  kaling:     { 노말:20,  하드:160, 익스트림:1200 },
+  hyungseong: { 노말:20,  하드:380 },
+  limbo:      { 노말:120, 하드:360 },
+  baldrix:    { 노말:150, 하드:450 },
+  jupiter:    { 노말:160, 하드:500 },
+};
+const DESTINY_BOSS_META = [
+  { id:'seren',       name:'선택받은 세렌',  maxParty:6, img:'images/bosses/seren.webp' },
+  { id:'kalos',       name:'감시자 칼로스',  maxParty:6, img:'images/bosses/kalos.webp' },
+  { id:'daejuk',      name:'최초의 대적자',  maxParty:3, img:'images/bosses/daejuk.webp' },
+  { id:'kaling',      name:'카링',           maxParty:6, img:'images/bosses/kaling.webp' },
+  { id:'hyungseong',  name:'찬란한 흉성',    maxParty:3, img:'images/bosses/hyungseong.webp' },
+  { id:'limbo',       name:'림보',           maxParty:3, img:'images/bosses/limbo.webp' },
+  { id:'baldrix',     name:'발드릭스',       maxParty:3, img:'images/bosses/baldrix.webp' },
+  { id:'jupiter',     name:'유피테르',       maxParty:3, img:'images/bosses/jupiter.webp' },
+];
+const DESTINY_QUESTS = [
+  { name:'세렌',     phase:1 },
+  { name:'칼로스',   phase:1 },
+  { name:'카링',     phase:1 },
+  { name:'대적자',   phase:2 },
+  { name:'림보',     phase:2 },
+  { name:'발드릭스', phase:2 },
+];
+const DESTINY_1ST_TARGET = 7500;
+const DESTINY_2ND_TARGET  = 45000;
+const DESTINY_RESOLVE_MAX = 50000;
 
 /* ══════════════════════════════════════════════
    보스 HP 페이즈 데이터 (직접 기입)
@@ -544,5 +580,15 @@ const BOSS_HP_PHASES = {
     { label:'Phase 1', hp:'5.34Q' },
     { label:'Phase 2', hp:'5.69Q' },
     { label:'Phase 3', hp:'9.31Q' },
+  ],
+  '유피테르_노말': [
+    { label:'Phase 1', hp:'2.05Q' },
+    { label:'Phase 2', hp:'3.08Q' },
+    { label:'Phase 3', hp:'5.13Q' },
+  ],
+  '유피테르_하드': [
+    { label:'Phase 1', hp:'9.88Q' },
+    { label:'Phase 2', hp:'14.82Q' },
+    { label:'Phase 3', hp:'24.70Q' },
   ],
 };
