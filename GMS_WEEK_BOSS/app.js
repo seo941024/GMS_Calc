@@ -687,6 +687,11 @@ document.getElementById('modalCharSave').addEventListener('click', () => {
   const level = Math.max(200, Math.min(300, parseInt(fetchedInfo.level)||200));
   const ji = jobIdxFromName(fetchedInfo.job);
   selectedJob = ji >= 0 ? ji : selectedJob;
+  // 같은 캐릭터(이름) 중복 추가 방지 (대소문자 무시, 편집 중인 본인은 제외)
+  const dup = state.chars.findIndex((c, idx) =>
+    idx !== editIdx && c.name?.toLowerCase() === name.toLowerCase());
+  if (dup >= 0) return alert('이미 추가된 캐릭터입니다.');
+
   if (editIdx >= 0) {
     state.chars[editIdx] = { ...state.chars[editIdx], name, level, jobIdx: selectedJob, fetched: fetchedInfo };
   } else {
