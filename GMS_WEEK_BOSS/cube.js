@@ -14,13 +14,12 @@ function _dataKey()    { return _CUBE_KEY[_activeType()]||'RED'; }
 function _cubeLv()     { return parseInt(document.getElementById('cubeLevel')?.value||0); }
 function _cubePart()   { return document.getElementById('cubePart')?.value||''; }
 function _cubeGrade()  { return document.getElementById('cubeGrade')?.value||'LEGENDARY'; }
-function _needAdj(base){ const lv=_cubeLv(); return lv>=160&&lv<250&&!_NO_GMS_ADJ.includes(base); }
 
-// ── 옵션명 파싱 ──────────────────────────────────
-// pct:    "공격력 : +12%"          → cat="공격력 %", valNum=12
-// flat:   "STR : +4"               → cat="STR", valNum=4
-// colon:  "재사용 대기시간 : -2초(...)" → cat="재사용 대기시간", valShort="-2초"
-// unique: "<쓸만한 블레스>..."      → cat=full name
+// ── 파싱 ─────────────────────────────────────
+// pct:    "공격력 : +12%"             → type='pct',  cat='공격력 %', base='공격력', valNum=12
+// flat:   "STR : +4"                  → type='flat', cat='STR',      base='STR',   valNum=4
+// colon:  "재사용 대기시간 : -2초(...)" → type='colon', cat='재사용 대기시간', valShort='-2초'
+// unique: "<쓸만한 블레스>..."          → type='unique'
 
 function _parse(name) {
   let m = /^(.+?) : \+(\d+\.?\d*)(%?)$/.exec(name);
@@ -30,15 +29,21 @@ function _parse(name) {
   return {cat:name, base:name, type:'unique', full:name};
 }
 
-// 숫자 수치가 없는 옵션 → 짧은 표시명
-function _shortDisplay(name, p) {
-  if (p.type==='colon')  return `${p.cat} ${p.valShort}`;
-  if (p.type==='unique') return name.replace(/<([^>]+)>/g,'$1').replace('스킬 사용 가능','스킬').trim();
-  return name;
+function _extractNum(s) { const m=/(\d+\.?\d*)/.exec(s||''); return m?+m[1]:0; }
+function _extractUnit(s) { const m=/[가-힣a-zA-Z초%]+$/.exec((s||'').trim()); return m?m[0]:''; }
+
+// GMS 보정 포함 stat 기여값 반환
+function _statContrib(name) {
+  const p=_parse(name), lv=_cubeLv();
+  if (p.type==='pct'||p.type==='flat') {
+    const adj = lv>=160&&lv<250&&!_NO_GMS_ADJ.includes(p.base) ? 1 : 0;
+    return {[p.cat]: p.valNum + adj};
+  }
+  if (p.type==='colon') return {[p.cat]: _extractNum(p.valShort)};
+  return {};
 }
 
-// ── 데이터 헬퍼 ─────────────────────────────────
-
+// ── 데이터 헬퍼 ─────────────────────────────
 function _bracket(dk, part, lv) {
   const t=window.CUBE_TABLE; if(!t) return null;
   const lvs=[...new Set(Object.keys(t.optionTable)
@@ -48,117 +53,102 @@ function _bracket(dk, part, lv) {
   let pick=lvs[0]; for(const L of lvs) if(L<=lv) pick=L;
   return pick;
 }
-
 function _rawOpts(dk, part, lv, grade) {
   const br=_bracket(dk,part,lv); if(!br) return [];
   return window.CUBE_TABLE?.optionTable[`${dk}|${part}|${br}|${grade}`]||[];
 }
 
-// ── 왼쪽 드롭다운 빌드 ───────────────────────────
-// pct/flat: 카테고리 1개 항목 (오른쪽 값 SELECT 있음)
-// colon/unique: 옵션 개별 항목 (오른쪽 없음)
-// data-type 속성으로 row 동작 분기
+// ── 왼쪽 드롭다운 ───────────────────────────
+// pct/flat/colon: 카테고리 1개 항목, 오른쪽 숫자 INPUT
+// unique: 개별 옵션 항목, 오른쪽 없음
 
 function _buildLeftOpts(dk, part, lv, grade) {
-  const gi = _GRADE_ORDER.indexOf(grade);
-  const lower = gi > 0 ? _GRADE_ORDER[gi-1] : null;
-
-  // 현재 등급 옵션 + 하위 등급 옵션 합산 (2,3번째 줄에서 하위 등급도 나올 수 있음)
-  const curOpts  = _rawOpts(dk, part, lv, grade);
-  const lowOpts  = lower ? _rawOpts(dk, part, lv, lower) : [];
-  if (!curOpts.length && !lowOpts.length) return '<option>— 데이터 없음 —</option>';
-
-  const html = [], seenCat = new Set(), seenUniq = new Set();
-
-  const addOpts = (opts, fromLower) => {
-    for (const o of opts) {
-      const p = _parse(o.name);
-      if (p.type==='pct'||p.type==='flat') {
-        if (!seenCat.has(p.cat)) {
-          seenCat.add(p.cat);
-          const label = fromLower ? `${p.cat} (${_GRADE_KR[lower]})` : p.cat;
-          html.push(`<option value="${p.cat}" data-numeric="1" data-pct="${p.pct?1:0}" data-base="${p.base}" data-lower="${fromLower?lower:''}">${label}</option>`);
-        }
-      } else {
-        if (!seenUniq.has(o.name)) {
-          seenUniq.add(o.name);
-          const disp = _shortDisplay(o.name, p);
-          const label = fromLower ? `${disp} (${_GRADE_KR[lower]})` : disp;
-          html.push(`<option value="${o.name}" data-numeric="0">${label}</option>`);
-        }
+  const opts = _rawOpts(dk, part, lv, grade);
+  if (!opts.length) return '<option>— 데이터 없음 —</option>';
+  const html=[], seenCat=new Set(), seenUniq=new Set();
+  for (const o of opts) {
+    const p=_parse(o.name);
+    if (p.type==='pct'||p.type==='flat'||p.type==='colon') {
+      if (!seenCat.has(p.cat)) {
+        seenCat.add(p.cat);
+        const unit = p.type==='pct' ? '%' : (p.type==='colon' ? _extractUnit(p.valShort) : '');
+        html.push(`<option value="${p.cat}" data-type="${p.type}" data-unit="${unit}">${p.cat}</option>`);
+      }
+    } else {
+      if (!seenUniq.has(o.name)) {
+        seenUniq.add(o.name);
+        const disp=o.name.replace(/<([^>]+)>/g,'$1').replace('스킬 사용 가능','스킬').trim();
+        html.push(`<option value="${o.name}" data-type="unique">${disp}</option>`);
       }
     }
-  };
-
-  addOpts(curOpts, false);
-  // 하위 등급에만 있는 옵션 추가
-  addOpts(lowOpts, true);
+  }
   return html.join('');
 }
 
-// 값 SELECT HTML (pct/flat 전용)
-function _buildValOpts(dk, part, lv, grade, catOpt) {
-  const cat      = catOpt.value;
-  const base     = catOpt.dataset.base||cat.replace(/ %$/,'');
-  const pct      = catOpt.dataset.pct==='1';
-  const adj      = pct && _needAdj(base);
-  const lowerGr  = catOpt.dataset.lower||'';
-  const lookupGr = lowerGr || grade;
-  const opts = _rawOpts(dk, part, lv, lookupGr).filter(o=>_parse(o.name).cat===cat);
-  return opts
-    .sort((a,b)=>_parse(b.name).valNum-_parse(a.name).valNum)
-    .map(o=>{ const v=_parse(o.name).valNum; return `<option value="${o.name}">${adj?v+1:v}</option>`; })
-    .join('');
-}
-
-// ── 목표 옵션 행 ─────────────────────────────────
-
+// ── 행 동기화 ───────────────────────────────
 function _syncRow(row) {
-  const catSel = row.querySelector('.cube-opt-cat');
-  const valSel = row.querySelector('.cube-opt-val');
-  const valLbl = row.querySelector('.cube-val-label');
-  const sel    = catSel.selectedOptions[0];
-  const numeric = sel?.dataset.numeric==='1';
-  if (numeric) {
-    valSel.innerHTML     = _buildValOpts(_dataKey(),_cubePart(),_cubeLv(),_cubeGrade(), sel);
-    valSel.style.display = '';
-    if (valLbl) valLbl.style.display = '';
+  const catSel=row.querySelector('.cube-opt-cat');
+  const inp   =row.querySelector('.cube-opt-inp');
+  const unitEl=row.querySelector('.cube-opt-unit');
+  const sel   =catSel.selectedOptions[0];
+  const type  =sel?.dataset.type||'';
+  if (type==='unique') {
+    inp.style.display='none'; unitEl.style.display='none';
   } else {
-    valSel.style.display = 'none';
-    if (valLbl) valLbl.style.display = 'none';
+    inp.style.display=''; unitEl.style.display='';
+    unitEl.textContent=sel?.dataset.unit||'';
   }
 }
 
-function _refreshRow(row) {
-  const catSel = row.querySelector('.cube-opt-cat');
-  const prev   = catSel.value;
-  catSel.innerHTML = _buildLeftOpts(_dataKey(),_cubePart(),_cubeLv(),_cubeGrade());
-  if (prev) catSel.value = prev;
-  _syncRow(row);
-}
-
-function _addGoalRow() {
-  const container = document.getElementById('cubeGoalRows');
-  if (!container||container.children.length>=3) return;
-  const row = document.createElement('div');
-  row.className = 'cube-goal-row';
-  row.innerHTML = `
+// ── 세트 / 행 생성 ──────────────────────────
+function _makeRow() {
+  const row=document.createElement('div');
+  row.className='cube-goal-row';
+  row.innerHTML=`
     <select class="sel cube-opt-cat"></select>
-    <select class="sel cube-opt-val" style="display:none"></select>
-    <span   class="cube-val-label" style="display:none"></span>
-    <button class="cube-goal-del" title="삭제">✕</button>`;
-  row.querySelector('.cube-opt-cat').addEventListener('change', ()=>_syncRow(row));
-  row.querySelector('.cube-goal-del').addEventListener('click', ()=>{ row.remove(); _updateAddBtn(); });
-  container.appendChild(row);
-  _refreshRow(row);
-  _updateAddBtn();
+    <input  class="inp cube-opt-inp" type="number" min="0" placeholder="합산 수치">
+    <span   class="cube-opt-unit"></span>`;
+  row.querySelector('.cube-opt-cat').addEventListener('change',()=>_syncRow(row));
+  return row;
 }
 
-function _refreshGoalRows() { document.querySelectorAll('.cube-goal-row').forEach(_refreshRow); }
-function _updateAddBtn()    { const b=document.getElementById('cubeAddGoalBtn'); if(b) b.disabled=document.querySelectorAll('.cube-goal-row').length>=3; }
+function _addSet() {
+  const container=document.getElementById('cubeSetContainer');
+  const idx=container.children.length+1;
+  const set=document.createElement('div');
+  set.className='cube-set';
+  set.innerHTML=`
+    <div class="cube-set__head">
+      <span class="cube-set__title">세트 ${idx}</span>
+      <button class="cube-set__del" title="삭제">✕</button>
+    </div>
+    <div class="cube-set__rows"></div>`;
+  set.querySelector('.cube-set__del').addEventListener('click',()=>{
+    set.remove(); _renumberSets();
+  });
+  const rowsEl=set.querySelector('.cube-set__rows');
+  for(let i=0;i<3;i++) rowsEl.appendChild(_makeRow());
+  container.appendChild(set);
+  _refreshAllRows();
+}
 
-// ── 등급 드롭다운 ────────────────────────────────
+function _renumberSets() {
+  document.querySelectorAll('.cube-set').forEach((s,i)=>{
+    s.querySelector('.cube-set__title').textContent=`세트 ${i+1}`;
+  });
+}
 
+function _refreshAllRows() {
+  document.querySelectorAll('.cube-goal-row').forEach(row=>{
+    const catSel=row.querySelector('.cube-opt-cat');
+    const prev=catSel.value;
+    catSel.innerHTML=_buildLeftOpts(_dataKey(),_cubePart(),_cubeLv(),_cubeGrade());
+    if(prev) catSel.value=prev;
+    _syncRow(row);
+  });
+}
+
+// ── 등급 드롭다운 ────────────────────────────
 function _populateGrade() {
   const sel=document.getElementById('cubeGrade'); if(!sel) return;
   const t=window.CUBE_TABLE; if(!t) return;
@@ -169,60 +159,83 @@ function _populateGrade() {
   if(grades.includes(prev)) sel.value=prev;
 }
 
-// ── 확률 계산 ────────────────────────────────────
+// ── 확률 계산 (열거법) ───────────────────────
+// 3개 라인의 모든 (opt1, opt2, opt3) 조합을 열거,
+// 세트 중 하나라도 만족하면 해당 조합의 확률을 합산
 
-function _computeP(kmsNames) {
+function _computeAllSets() {
   const dk=_dataKey(), part=_cubePart(), lv=_cubeLv(), grade=_cubeGrade();
   const t=window.CUBE_TABLE; if(!t) return 0;
   const og=t.optionGrade[dk]?.[grade]; if(!og) return 0;
   const gi=_GRADE_ORDER.indexOf(grade);
   const lower=gi>0?_GRADE_ORDER[gi-1]:null;
 
-  const names=kmsNames.map((_,i)=>`__g${i}__`);
-  const getP=(g,kn)=>_rawOpts(dk,part,lv,g).find(o=>o.name===kn)?.probability??0;
+  const curOpts=_rawOpts(dk,part,lv,grade);
+  const lowOpts=lower?_rawOpts(dk,part,lv,lower):[];
+  const allNames=[...new Set([...curOpts.map(o=>o.name),...lowOpts.map(o=>o.name)])];
+  if(!allNames.length) return 0;
 
-  const buildLine=ln=>{
+  const curMap=Object.fromEntries(curOpts.map(o=>[o.name,o.probability]));
+  const lowMap=Object.fromEntries(lowOpts.map(o=>[o.name,o.probability]));
+
+  const lineProbs=[1,2,3].map(ln=>{
     const info=og.find(o=>o.line===ln);
     const cp=info?.currentGradeProb??0, lp=info?.lowerGradeProb??0;
-    const opts=kmsNames.map((kn,i)=>({
-      name:names[i],
-      probability: cp*getP(grade,kn)+(lower?lp*getP(lower,kn):0)
-    }));
-    const tot=opts.reduce((s,o)=>s+o.probability,0);
-    if(tot<1) opts.push({name:'__rest__',probability:1-tot});
-    return opts;
-  };
+    return allNames.map(name=>cp*(curMap[name]||0)+lp*(lowMap[name]||0));
+  });
 
-  const lines=[buildLine(1),buildLine(2),buildLine(3)];
-  const pp=lines.map(opts=>names.map(nm=>{
-    const tot=opts.reduce((s,o)=>s+o.probability,0);
-    return tot?(opts.find(o=>o.name===nm)?.probability??0)/tot:0;
-  }));
+  // UI에서 세트 파싱
+  const sets=[];
+  document.querySelectorAll('.cube-set').forEach(setEl=>{
+    const goals=[];
+    setEl.querySelectorAll('.cube-goal-row').forEach(row=>{
+      const catSel=row.querySelector('.cube-opt-cat');
+      const inp   =row.querySelector('.cube-opt-inp');
+      const sel   =catSel.selectedOptions[0];
+      if(!sel) return;
+      const type=sel.dataset.type||'';
+      if(type==='unique') {
+        goals.push({isUnique:true, kmsName:catSel.value});
+      } else {
+        const target=parseFloat(inp.value);
+        if(!isNaN(target)&&target>0) goals.push({isUnique:false, cat:catSel.value, target});
+      }
+    });
+    if(goals.length) sets.push(goals);
+  });
+  if(!sets.length) return 0;
 
-  const inj=[];
-  if(names.length===1){for(let i=0;i<3;i++)inj.push([i]);}
-  else if(names.length===2){for(let i=0;i<3;i++)for(let j=0;j<3;j++)if(i!==j)inj.push([i,j]);}
-  else{[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]].forEach(s=>inj.push(s));}
-
-  const m=inj.length; let res=0;
-  for(let mask=1;mask<(1<<m);mask++){
-    const chosen=[]; for(let b=0;b<m;b++) if(mask&(1<<b)) chosen.push(b);
-    const sign=chosen.length%2===1?1:-1;
-    const req=[new Set(),new Set(),new Set()];
-    for(const bi of chosen){const s=inj[bi];for(let k=0;k<names.length;k++)req[s[k]].add(k);}
-    let prob=1,valid=true;
-    for(let l=0;l<3;l++){
-      const rs=[...req[l]]; if(!rs.length) continue;
-      const strs=[...new Set(rs.map(k=>names[k]))]; if(strs.length>1){valid=false;break;}
-      prob*=pp[l][rs[0]];
+  // 세트 만족 체크
+  function checkSet(set, opts) {
+    for(const goal of set) {
+      if(goal.isUnique) {
+        if(!opts.includes(goal.kmsName)) return false;
+      } else {
+        let total=0;
+        for(const o of opts){ const c=_statContrib(o); total+=c[goal.cat]||0; }
+        if(total<goal.target) return false;
+      }
     }
-    if(valid) res+=sign*prob;
+    return true;
   }
-  return res;
+
+  const n=allNames.length;
+  let totalP=0;
+  for(let i=0;i<n;i++){
+    const p1=lineProbs[0][i]; if(!p1) continue;
+    for(let j=0;j<n;j++){
+      const p2=lineProbs[1][j]; if(!p2) continue;
+      for(let k=0;k<n;k++){
+        const p3=lineProbs[2][k]; if(!p3) continue;
+        const combo=[allNames[i],allNames[j],allNames[k]];
+        if(sets.some(s=>checkSet(s,combo))) totalP+=p1*p2*p3;
+      }
+    }
+  }
+  return totalP;
 }
 
-// ── 결과 렌더 ────────────────────────────────────
-
+// ── 결과 렌더 ────────────────────────────────
 function _renderResult(p) {
   const el=document.getElementById('cubeResults');
   const meso=CUBE_MESO[_activeType()]??null;
@@ -236,36 +249,27 @@ function _renderResult(p) {
     <div class="sf-res-item"><span class="sf-res-label">90% 확률 이내</span><span class="sf-res-val" style="color:var(--danger)">${Math.ceil(ec*2.303).toLocaleString()} 개</span></div>`;
 }
 
-// ── 초기화 ──────────────────────────────────────
-
+// ── 초기화 ──────────────────────────────────
 async function initCube() {
   const partSel=document.getElementById('cubePart');
   if(partSel) partSel.innerHTML=CUBE_PARTS.map(p=>`<option value="${p}">${p}</option>`).join('');
 
   document.querySelectorAll('.cube-type-btn').forEach(btn=>btn.addEventListener('click',()=>{
     document.querySelectorAll('.cube-type-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active'); _populateGrade(); _refreshGoalRows();
+    btn.classList.add('active'); _populateGrade(); _refreshAllRows();
   }));
 
-  ['cubePart','cubeGrade'].forEach(id=>document.getElementById(id)?.addEventListener('change',_refreshGoalRows));
-  document.getElementById('cubeLevel')?.addEventListener('input',_refreshGoalRows);
-  document.getElementById('cubeAddGoalBtn')?.addEventListener('click',_addGoalRow);
+  ['cubePart','cubeGrade'].forEach(id=>document.getElementById(id)?.addEventListener('change',_refreshAllRows));
+  document.getElementById('cubeLevel')?.addEventListener('input',_refreshAllRows);
+  document.getElementById('cubeAddSetBtn')?.addEventListener('click',_addSet);
 
   _populateGrade();
-  _addGoalRow();
+  _addSet(); // 기본 세트 1개
 
   document.getElementById('cubeExpectedBtn')?.addEventListener('click',()=>{
     const el=document.getElementById('cubeResults');
-    const kmsNames=[...document.querySelectorAll('.cube-goal-row')].map(row=>{
-      const catSel=row.querySelector('.cube-opt-cat');
-      const valSel=row.querySelector('.cube-opt-val');
-      const numeric=catSel.selectedOptions[0]?.dataset.numeric==='1';
-      return numeric ? valSel.value : catSel.value;
-    }).filter(Boolean);
-
-    if(!kmsNames.length){alert('목표 옵션을 1개 이상 선택하세요.');return;}
-    const p=_computeP(kmsNames);
-    if(!p){el.innerHTML='<p class="empty">해당 옵션 데이터가 없습니다. 부위·레벨·등급을 확인하세요.</p>';return;}
+    const p=_computeAllSets();
+    if(!p){el.innerHTML='<p class="empty">목표 옵션을 입력하거나 데이터를 확인하세요.</p>';return;}
     _renderResult(p);
   });
 }

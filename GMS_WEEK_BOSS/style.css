@@ -843,14 +843,16 @@ select.sel.sf-stage-sel { width: 80px; flex-shrink: 0; font-size: .8rem; padding
 .cube-btn-row { display: flex; gap: 8px; }
 .cube-btn-row .sbtn { flex: 1; text-align: center; }
 
-.cube-manual-desc { font-size: .82rem; color: var(--text-sub); margin: 4px 0 10px; line-height: 1.6; }
-.cube-manual-ex   { font-size: .78rem; opacity: .8; }
-.cube-goal-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+/* 큐브 옵션 세트 */
+.cube-set { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+.cube-set__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.cube-set__title { font-size: .85rem; font-weight: 600; color: var(--text-sub); }
+.cube-set__del { background: none; border: none; color: var(--text-sub); cursor: pointer; font-size: .9rem; padding: 2px 6px; border-radius: 4px; line-height: 1; }
+.cube-set__del:hover { color: var(--danger); background: var(--bg-hover); }
+.cube-goal-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
 .cube-goal-row .sel { flex: 1; min-width: 0; }
-.cube-goal-row .inp { width: 72px; flex: 0 0 72px; text-align: right; }
-.cube-goal-row .cube-goal-unit { color: var(--text-sub); font-size: .85rem; white-space: nowrap; min-width: 12px; }
-.cube-goal-row .cube-goal-del { background: none; border: none; color: var(--text-sub); cursor: pointer; font-size: 1rem; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
-.cube-goal-row .cube-goal-del:hover { color: var(--danger); }
+.cube-goal-row .cube-opt-inp { width: 72px; flex: 0 0 72px; text-align: right; }
+.cube-goal-row .cube-opt-unit { color: var(--text-sub); font-size: .85rem; white-space: nowrap; min-width: 14px; }
 .mb16 { margin-bottom: 16px; }
 
 /* ?? 蹂댁뒪 ?몃옒而??쒖씠??踰꾪듉 ?? */
