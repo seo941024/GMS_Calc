@@ -332,64 +332,48 @@
 
     <!-- ══════ 큐브 시뮬레이터 ══════ -->
     <section class="sec" id="sec-cube">
-      <div class="sec-head"><h2 class="sec-title">큐브 시뮬레이터</h2></div>
-
-      <!-- 큐브 종류 공통 -->
-      <div class="card mb16">
-        <div class="field">
-          <label class="field__label">큐브 종류</label>
-          <div class="cube-type-grid">
-            <button class="cube-type-btn" data-type="craft">
-              <img src="images/icons/Hard.png" alt="">
-              <span>장인의 큐브</span>
-            </button>
-            <button class="cube-type-btn" data-type="master">
-              <img src="images/icons/Solid.png" alt="">
-              <span>명장의 큐브</span>
-            </button>
-            <button class="cube-type-btn active" data-type="red">
-              <img src="images/icons/Glowing.png" alt="">
-              <span>레드 큐브</span>
-            </button>
-            <button class="cube-type-btn" data-type="black">
-              <img src="images/icons/Bright.png" alt="">
-              <span>블랙 큐브</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      <div class="sec-head"><h2 class="sec-title">큐브 기댓값 계산기</h2></div>
 
       <div class="sf-layout">
-        <!-- 등급업 확률보기 -->
+        <!-- 설정 카드 -->
         <div class="card">
-          <div class="card__title">등급업 확률보기</div>
-          <div class="field mt8">
-            <label class="field__label">현재 등급</label>
-            <select class="sel" id="cubeGradeFrom"></select>
-          </div>
-          <div id="cubeGradeUpInfo" class="cube-grade-info"></div>
-          <div class="cube-btns">
-            <div class="cube-btn-row">
-              <button class="sbtn sbtn--ghost" id="cubeGradeUpRunBtn">시뮬레이션 시작</button>
-              <button class="sbtn sbtn--ghost" id="cubeGradeUpStopBtn" disabled>중지</button>
+          <div class="card__title">설정</div>
+
+          <div class="field">
+            <label class="field__label">큐브 종류</label>
+            <div class="cube-type-grid">
+              <button class="cube-type-btn" data-type="craft">
+                <img src="images/icons/Hard.png" alt="">
+                <span>장인의 큐브</span>
+              </button>
+              <button class="cube-type-btn" data-type="master">
+                <img src="images/icons/Solid.png" alt="">
+                <span>명장의 큐브</span>
+              </button>
+              <button class="cube-type-btn active" data-type="red">
+                <img src="images/icons/Glowing.png" alt="">
+                <span>레드 큐브</span>
+              </button>
+              <button class="cube-type-btn" data-type="black">
+                <img src="images/icons/Bright.png" alt="">
+                <span>블랙 큐브</span>
+              </button>
             </div>
           </div>
-          <div id="cubeGradeUpResults"><p class="empty">결과가 없습니다.</p></div>
-        </div>
 
-        <!-- 옵션 뽑기 -->
-        <div class="card">
-          <div class="card__title">옵션 뽑기</div>
-          <p class="cube-manual-desc">옵션이 한 줄에 뜰 확률(%)을 직접 입력하세요.</p>
+          <div class="card__title mt16">목표 옵션</div>
+          <p class="cube-manual-desc">원하는 옵션은 합산해서 적어주세요.<br><span class="cube-manual-ex">(ex. 공격력 13%, 10% → 공격력 23%)</span></p>
           <div id="cubeManualGoals"></div>
           <button class="sbtn sbtn--ghost cube-btn-full mt8" id="cubeAddGoalBtn">+ 목표 옵션 추가</button>
+
           <div class="cube-btns">
             <button class="sbtn sbtn--ghost cube-btn-full" id="cubeExpectedBtn">기댓값 계산</button>
-            <div class="cube-btn-row">
-              <button class="sbtn sbtn--ghost" id="cubeRunBtn">시뮬레이션 시작</button>
-              <button class="sbtn sbtn--ghost" id="cubeStopBtn" disabled>중지</button>
-            </div>
           </div>
+        </div>
+
+        <!-- 결과 카드 -->
+        <div class="card">
+          <div class="card__title">결과</div>
           <div id="cubeResults"><p class="empty">결과가 없습니다.</p></div>
         </div>
       </div>

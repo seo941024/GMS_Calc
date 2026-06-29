@@ -843,8 +843,8 @@ select.sel.sf-stage-sel { width: 80px; flex-shrink: 0; font-size: .8rem; padding
 .cube-btn-row { display: flex; gap: 8px; }
 .cube-btn-row .sbtn { flex: 1; text-align: center; }
 
-.cube-grade-info { margin: 12px 0 4px; font-size: .9rem; color: var(--accent); min-height: 1.4em; }
-.cube-manual-desc { font-size: .78rem; color: var(--text-sub); margin: 4px 0 10px; }
+.cube-manual-desc { font-size: .82rem; color: var(--text-sub); margin: 4px 0 10px; line-height: 1.6; }
+.cube-manual-ex   { font-size: .78rem; opacity: .8; }
 .cube-manual-goal-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
 .cube-manual-goal-row .inp { flex: 1; min-width: 0; }
 .cube-manual-goal-row .inp.cube-goal-prob { width: 80px; flex: 0 0 80px; text-align: right; }
