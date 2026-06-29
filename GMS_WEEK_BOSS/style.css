@@ -843,6 +843,18 @@ select.sel.sf-stage-sel { width: 80px; flex-shrink: 0; font-size: .8rem; padding
 .cube-btn-row { display: flex; gap: 8px; }
 .cube-btn-row .sbtn { flex: 1; text-align: center; }
 
+/* 큐브 결과 모달 */
+.modal--cube-result { width: min(900px, 96vw); max-height: 88vh; display: flex; flex-direction: column; }
+.cube-result-body { display: flex; gap: 20px; flex: 1; overflow: hidden; padding: 0 4px 4px; }
+.cube-result-left { flex: 0 0 260px; display: flex; flex-direction: column; gap: 2px; }
+.cube-result-right { flex: 1; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+.cube-combo-note { font-size: .78rem; color: var(--text-sub); margin-bottom: 8px; }
+.cube-combo-item { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.cube-combo-item:last-child { border-bottom: none; }
+.cube-combo-line { display: block; font-size: .85rem; color: var(--text-main); line-height: 1.5; }
+.cube-combo-p { display: block; font-size: .78rem; color: var(--accent); margin-top: 2px; }
+.mb8 { margin-bottom: 8px; }
+
 /* 큐브 옵션 세트 */
 .cube-set { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
 .cube-set__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }

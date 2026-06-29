@@ -223,6 +223,7 @@ function _computeAllSets() {
 
   const n=allNames.length;
   let totalP=0;
+  const combos=[];
   for(let i=0;i<n;i++){
     const p1=lineProbs[0][i]; if(!p1) continue;
     for(let j=0;j<n;j++){
@@ -230,25 +231,54 @@ function _computeAllSets() {
       for(let k=0;k<n;k++){
         const p3=lineProbs[2][k]; if(!p3) continue;
         const combo=[allNames[i],allNames[j],allNames[k]];
-        if(sets.some(s=>checkSet(s,combo))) totalP+=p1*p2*p3;
+        if(sets.some(s=>checkSet(s,combo))){
+          const cp=p1*p2*p3;
+          totalP+=cp;
+          combos.push({lines:combo, p:cp});
+        }
       }
     }
   }
-  return totalP;
+  combos.sort((a,b)=>b.p-a.p);
+  return {p:totalP, combos};
 }
 
-// ── 결과 렌더 ────────────────────────────────
-function _renderResult(p) {
-  const el=document.getElementById('cubeResults');
+// ── 옵션명 짧게 표시 ─────────────────────────
+function _shortName(name) {
+  const p=_parse(name);
+  if(p.type==='pct')    return `${p.base} : +${p.valNum}%`;
+  if(p.type==='flat')   return `${p.base} : +${p.valNum}`;
+  if(p.type==='colon')  return `${p.cat} ${p.valShort}`;
+  return name.replace(/<([^>]+)>/g,'$1').replace('스킬 사용 가능','스킬').trim();
+}
+
+// ── 결과 모달 ────────────────────────────────
+function _renderResult(totalP, combos) {
   const meso=CUBE_MESO[_activeType()]??null;
-  const ec=1/p;
-  el.innerHTML=`
-    <div class="sf-res-item"><span class="sf-res-label">성공 확률</span><span class="sf-res-val big">${(p*100).toFixed(4)}%</span></div>
-    <div class="sf-res-item"><span class="sf-res-label">기댓값 (평균 큐브 수)</span><span class="sf-res-val">${Math.ceil(ec).toLocaleString()} 개</span></div>
-    ${meso!=null?`<div class="sf-res-item"><span class="sf-res-label">기댓값 (평균 메소)</span><span class="sf-res-val">${fmtMeso(Math.round(ec*meso))}</span></div>`:''}
-    <div class="sf-res-item"><span class="sf-res-label">10만 회 기대 성공</span><span class="sf-res-val">${Math.round(100000*p).toLocaleString()} 회</span></div>
-    <div class="sf-res-item"><span class="sf-res-label">10% 확률 이내</span><span class="sf-res-val">${Math.ceil(ec*0.105).toLocaleString()} 개</span></div>
-    <div class="sf-res-item"><span class="sf-res-label">90% 확률 이내</span><span class="sf-res-val" style="color:var(--danger)">${Math.ceil(ec*2.303).toLocaleString()} 개</span></div>`;
+  const ec=1/totalP;
+
+  // 기댓값 패널
+  const statsHtml=`
+    <div class="sf-res-item"><span class="sf-res-label">1회 시행 목표 달성 확률</span><span class="sf-res-val big">${(totalP*100).toFixed(7)}%</span></div>
+    <div class="sf-res-item"><span class="sf-res-label">평균 큐브 수</span><span class="sf-res-val">${Math.ceil(ec).toLocaleString()} 회</span></div>
+    ${meso!=null?`<div class="sf-res-item"><span class="sf-res-label">평균 메소</span><span class="sf-res-val">${fmtMeso(Math.round(ec*meso))}</span></div>`:''}
+    <div class="sf-res-item"><span class="sf-res-label">10% 확률 이내</span><span class="sf-res-val">${Math.ceil(ec*0.105).toLocaleString()} 회</span></div>
+    <div class="sf-res-item"><span class="sf-res-label">90% 확률 이내</span><span class="sf-res-val" style="color:var(--danger)">${Math.ceil(ec*2.303).toLocaleString()} 회</span></div>`;
+
+  // 조합 목록
+  const MAX=50;
+  const shown=combos.slice(0,MAX);
+  const moreNote=combos.length>MAX?`<p class="cube-combo-note">조건을 만족하는 경우가 너무 많아 상위 ${MAX}개를 표시합니다.</p>`:'';
+  const combosHtml=moreNote+shown.map(c=>`
+    <div class="cube-combo-item">
+      ${c.lines.map(l=>`<span class="cube-combo-line">${_shortName(l)}</span>`).join('')}
+      <span class="cube-combo-p">${(c.p*100).toFixed(7)}%</span>
+    </div>`).join('');
+
+  const modal=document.getElementById('overlayCubeResult');
+  modal.querySelector('.cube-result-stats').innerHTML=statsHtml;
+  modal.querySelector('.cube-result-combos').innerHTML=combosHtml;
+  modal.style.display='flex';
 }
 
 // ── 초기화 ──────────────────────────────────
@@ -269,9 +299,18 @@ async function initCube() {
   _addSet(); // 기본 세트 1개
 
   document.getElementById('cubeExpectedBtn')?.addEventListener('click',()=>{
-    const el=document.getElementById('cubeResults');
-    const p=_computeAllSets();
-    if(!p){el.innerHTML='<p class="empty">목표 옵션을 입력하거나 데이터를 확인하세요.</p>';return;}
-    _renderResult(p);
+    const res=_computeAllSets();
+    if(!res||!res.p){
+      alert('목표 옵션을 입력하거나 데이터를 확인하세요.');return;
+    }
+    _renderResult(res.p, res.combos);
+  });
+
+  // 모달 닫기
+  document.getElementById('cubeResultClose')?.addEventListener('click',()=>{
+    document.getElementById('overlayCubeResult').style.display='none';
+  });
+  document.getElementById('overlayCubeResult')?.addEventListener('click',e=>{
+    if(e.target===e.currentTarget) e.currentTarget.style.display='none';
   });
 }
