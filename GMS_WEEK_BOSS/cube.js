@@ -64,8 +64,9 @@ function _rawOpts(dk, part, lv, grade) {
 
 function _buildLeftOpts(dk, part, lv, grade) {
   const opts = _rawOpts(dk, part, lv, grade);
-  if (!opts.length) return '<option>— 데이터 없음 —</option>';
-  const html=[], seenCat=new Set(), seenUniq=new Set();
+  if (!opts.length) return '<option value="" data-type="none">선택 안함</option><option>— 데이터 없음 —</option>';
+  // 맨 위에 '선택 안함'(빈 값) — 이 줄을 목표에서 제외하고 싶을 때
+  const html=['<option value="" data-type="none">선택 안함</option>'], seenCat=new Set(), seenUniq=new Set();
   for (const o of opts) {
     const p=_parse(o.name);
     if (p.type==='pct'||p.type==='flat'||p.type==='colon') {
@@ -92,7 +93,7 @@ function _syncRow(row) {
   const unitEl=row.querySelector('.cube-opt-unit');
   const sel   =catSel.selectedOptions[0];
   const type  =sel?.dataset.type||'';
-  if (type==='unique') {
+  if (type==='unique' || type==='none' || !catSel.value) {
     inp.style.display='none'; unitEl.style.display='none';
   } else {
     inp.style.display=''; unitEl.style.display='';
@@ -194,6 +195,7 @@ function _computeAllSets() {
       const sel   =catSel.selectedOptions[0];
       if(!sel) return;
       const type=sel.dataset.type||'';
+      if(type==='none' || !catSel.value) return;  // '선택 안함' 줄은 목표에서 제외
       if(type==='unique') {
         goals.push({isUnique:true, kmsName:catSel.value});
       } else {
