@@ -851,7 +851,8 @@ select.sel.sf-stage-sel { width: 80px; flex-shrink: 0; font-size: .8rem; padding
 .diff-btns { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
 .diff-btns .dpill { cursor: pointer; padding: 5px 14px; font-size: .72rem; }
 .boss-diff-wrap { display: flex; align-items: center; gap: 8px; }
-.boss-diff-wrap .dpill { pointer-events: none; padding: 3px 0; font-size: .7rem; flex-shrink: 0; width: 56px; text-align: center; justify-content: center; }
+.boss-diff-wrap .dpill { pointer-events: none; padding: 3px 0; flex-shrink: 0; width: 56px; text-align: center; justify-content: center; }
+.boss-diff-wrap .dpill .dpill__t { font-size: clamp(.44rem, 1.1vw, .62rem); }
 .boss-diff-sel {
   appearance: none; -webkit-appearance: none;
   background: var(--bg3) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E") no-repeat right 8px center;
