@@ -1569,7 +1569,7 @@ body.sidebar-open .hamburger span:nth-child(3) { transform: translateY(-6px) rot
   .cube-result-body { flex-direction: column; overflow: visible; }
   .cube-result-left { flex: none; }
   .modal--cube-result { max-height: 95vh; }
-  .modal--cube-result .modal__body { overflow-y: auto; }
+  .modal--cube-result .modal__body { overflow-y: auto; padding: 14px 14px 16px; }
 
   /* 추옵·스타포스·큐브·환산 좌우 → 세로 (2~5) */
   .sf-layout { grid-template-columns: 1fr !important; }
