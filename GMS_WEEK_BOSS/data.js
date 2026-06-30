@@ -341,7 +341,7 @@ const GENESIS_PASS_MULT = 3;     // 제네시스 패스: 흔적 획득 3배
 
 /* ─── 데스티니 해방 ─── */
 const DESTINY_RESOLVE_YIELD = {
-  seren:      { 노말:6,   하드:80 },
+  seren:      { 하드:6,   익스트림:80 },
   kalos:      { 노말:10,  하드:70,  카오스:400 },
   daejuk:     { 노말:20,  하드:120, 익스트림:500 },
   kaling:     { 노말:20,  하드:160, 익스트림:1200 },
