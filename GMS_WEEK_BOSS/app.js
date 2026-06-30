@@ -876,6 +876,38 @@ function renderCharInfo() {
       card.classList.remove('dragging');
       box.querySelectorAll('.cg-card').forEach(c => c.classList.remove('drag-over'));
     });
+
+    // 터치 드래그
+    card.addEventListener('touchstart', e => {
+      dragSrc = card;
+      card.classList.add('dragging');
+    }, { passive: true });
+    card.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const el = document.elementFromPoint(touch.clientX, touch.clientY);
+      const target = el && el.closest('.cg-card');
+      box.querySelectorAll('.cg-card').forEach(c => c.classList.remove('drag-over'));
+      if (target && target !== dragSrc) target.classList.add('drag-over');
+    }, { passive: false });
+    card.addEventListener('touchend', e => {
+      card.classList.remove('dragging');
+      const touch = e.changedTouches[0];
+      const el = document.elementFromPoint(touch.clientX, touch.clientY);
+      const target = el && el.closest('.cg-card');
+      box.querySelectorAll('.cg-card').forEach(c => c.classList.remove('drag-over'));
+      if (!target || target === dragSrc) { dragSrc = null; return; }
+      const from = parseInt(dragSrc.dataset.ci);
+      const to   = parseInt(target.dataset.ci);
+      const arr  = state.chars;
+      arr.splice(to, 0, arr.splice(from, 1)[0]);
+      if (state.activeChar === from) state.activeChar = to;
+      else if (from < to && state.activeChar > from && state.activeChar <= to) state.activeChar--;
+      else if (from > to && state.activeChar >= to && state.activeChar < from) state.activeChar++;
+      dragSrc = null;
+      save(); renderCharList(); renderBossTable(); renderCharInfo();
+    });
+
     card.addEventListener('dragover', e => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
