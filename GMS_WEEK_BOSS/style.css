@@ -129,13 +129,13 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
   font-size: .88rem; font-weight: 800; color: var(--accent);
   background: rgba(246,199,68,.1);
   border: 1px solid rgba(246,199,68,.25);
-  padding: 5px 16px; border-radius: var(--radius-pill);
+  padding: 5px 16px; border-radius: 6px;
   font-variant-numeric: tabular-nums;
   text-shadow: 0 0 8px rgba(246,199,68,.5);
 }
 .header__right { display: flex; gap: 6px; align-items: center; }
 .hbtn {
-  padding: 6px 16px; border-radius: var(--radius-pill);
+  padding: 6px 16px; border-radius: 6px;
   font-size: .78rem; font-weight: 800; letter-spacing: .3px;
   color: #c4b5fd;
   background: linear-gradient(135deg, #1e1245 0%, #150d35 100%);
