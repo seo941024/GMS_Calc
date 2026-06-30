@@ -144,7 +144,7 @@ function flameScoreSim() {
 
 function _flameScoreRenderResult(results, N, target) {
   const resEl = document.getElementById('flameScoreResult');
-  const FLAME_NAMES = { POWERFUL:'강력한 환생의 불꽃', ETERNAL:'영원한 환생의 불꽃', ABYSS:'심연한 환생의 불꽃' };
+  const FLAME_NAMES = { POWERFUL:'강력한 환생의 불꽃', ETERNAL:'영원한 환생의 불꽃', ABYSS:'심연의 환생의 불꽃' };
 
   const cards = results.map(({ key, meta, k, p }) => {
     if (k === 0) return `
@@ -541,6 +541,7 @@ function initAddOption() {
       tab.classList.add('active');
       const isSim = tab.dataset.tab === 'sim';
       document.getElementById('flameEquipGroup').closest('div').style.display = isSim ? '' : 'none';
+      document.getElementById('flameTypeGroup').closest('div').style.display  = isSim ? '' : 'none';
       document.getElementById('flameTabSim').style.display         = isSim ? '' : 'none';
       document.getElementById('flameTabScore').style.display       = isSim ? 'none' : '';
       document.getElementById('flameStatTableCard').style.display  = isSim ? '' : 'none';
