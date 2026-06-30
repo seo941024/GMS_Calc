@@ -878,13 +878,23 @@ function renderCharInfo() {
       box.querySelectorAll('.cg-card').forEach(c => c.classList.remove('drag-over'));
     });
 
-    // 터치 드래그
+    // 터치 드래그 (수직 스크롤 허용: 일정 거리 이동 후 드래그 시작)
+    let touchStartX = 0, touchStartY = 0, touchDragging = false;
     card.addEventListener('touchstart', e => {
-      dragSrc = card;
-      card.classList.add('dragging');
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchDragging = false;
     }, { passive: true });
     card.addEventListener('touchmove', e => {
+      const dx = Math.abs(e.touches[0].clientX - touchStartX);
+      const dy = Math.abs(e.touches[0].clientY - touchStartY);
+      if (!touchDragging && (dx > 8 || dy > 8)) {
+        if (dx > dy) { touchDragging = true; }  // 수평 이동 → 드래그
+        else { return; }                          // 수직 이동 → 스크롤 허용
+      }
+      if (!touchDragging) return;
       e.preventDefault();
+      if (!dragSrc) { dragSrc = card; card.classList.add('dragging'); }
       const touch = e.touches[0];
       const el = document.elementFromPoint(touch.clientX, touch.clientY);
       const target = el && el.closest('.cg-card');
