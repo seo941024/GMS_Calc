@@ -1460,6 +1460,7 @@ select.sel.sf-stage-sel { width: 80px; flex-shrink: 0; font-size: .8rem; padding
 }
 
 /* ── 햄버거 / 드로어 오버레이 (기본: 데스크탑에선 숨김) ── */
+#sbBtnSettings { display: none; }
 .hamburger { display: none; flex-direction: column; justify-content: center; gap: 4px; width: 34px; height: 34px; padding: 6px; border-radius: 8px; flex-shrink: 0; }
 .hamburger span { display: block; height: 2px; width: 100%; background: #c4b5fd; border-radius: 2px; transition: .25s; }
 body.sidebar-open .hamburger span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
@@ -1478,6 +1479,8 @@ body.sidebar-open .hamburger span:nth-child(3) { transform: translateY(-6px) rot
 /* ══════════════ 모바일 레이아웃 (≤768px) ══════════════ */
 @media (max-width: 768px) {
   .hamburger { display: flex; }
+  #sbBtnSettings { display: inline-flex; }
+  #headerBtnSettings { display: none; }
   .header { padding: 0 14px; gap: 10px; }
   .header__title { font-size: .8rem; }
   .header__rlabel { display: none; }
