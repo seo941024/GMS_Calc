@@ -33,8 +33,11 @@
     <!-- 캐릭터 영역 -->
     <div class="sb-char-area">
       <div class="sb-char-head">
-        <span class="sb-label">캐릭터</span>
-        <button class="sbtn sbtn--add" id="btnAddChar">+ 추가</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="sb-label">캐릭터</span>
+          <button class="sbtn sbtn--add" id="btnAddChar">+ 추가</button>
+        </div>
+        <button class="sbtn sbtn--ghost" id="sbBtnSettings" style="padding:4px 10px;">⚙ 설정</button>
       </div>
       <ul class="char-list" id="charList"></ul>
       <div class="crystal-bar">
@@ -88,11 +91,6 @@
         <span class="sb-nav__icon-wrap"><img class="sb-nav__icon" src="images/icons/boss.webp" alt="" onerror="this.style.display='none'"></span><span>보스 정보</span>
       </button>
     </nav>
-    <div class="sb-bottom">
-      <button class="sb-nav__item" id="sbBtnSettings">
-        <span class="sb-nav__icon-wrap"></span><span>설정</span>
-      </button>
-    </div>
   </aside>
 
   <!-- ── MAIN ── -->
