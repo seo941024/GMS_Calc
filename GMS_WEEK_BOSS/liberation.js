@@ -67,7 +67,7 @@ function calcResult() {
   const remaining  = Math.max(0, GENESIS_TARGET - totalSpent);
   const pct        = Math.min(100, Math.round(totalSpent / GENESIS_TARGET * 100));
 
-  // 1주차: 이번주 주간보스 + 이번달 검마(미격파 시)
+  // 이번주 남은 수입 (미격파 보스만)
   const week1income = thisWeekly + thisMonthly;
 
   let daysLeft = null, targetDateStr = '—';
@@ -76,17 +76,22 @@ function calcResult() {
     daysLeft = 0;
     targetDateStr = '이미 달성!';
   } else if (fullWeekly > 0 || fullMonthly > 0) {
-    // 몇 번의 목요일 리셋이 필요한지 계산
-    const afterWeek1 = Math.max(0, remaining - week1income);
-    const resetsNeeded = afterWeek1 <= 0
-      ? 1
-      : 1 + Math.ceil(afterWeek1 / (fullWeekly + fullMonthly / 4));
-
     // 시작일에서 첫 목요일 리셋 찾기
     const startD = new Date(genState.startDate || nextThursday());
     const daysToFirstReset = (4 - startD.getDay() + 7) % 7 || 7;
 
-    // 해방 날짜 = 첫 리셋 + (resetsNeeded-1)주
+    let resetsNeeded;
+    if (week1income === 0) {
+      // 이번주 보스 전부 완료 → 다음 목요일 리셋부터 fullWeekly 수입
+      resetsNeeded = Math.ceil(remaining / (fullWeekly + fullMonthly / 4));
+    } else {
+      const afterWeek1 = Math.max(0, remaining - week1income);
+      resetsNeeded = afterWeek1 <= 0
+        ? 1
+        : 1 + Math.ceil(afterWeek1 / (fullWeekly + fullMonthly / 4));
+    }
+
+    // 해방 날짜
     const libDate = new Date(startD);
     libDate.setDate(startD.getDate() + daysToFirstReset + (resetsNeeded - 1) * 7);
 
