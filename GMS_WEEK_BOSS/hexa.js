@@ -16,13 +16,13 @@ function _hxSave(key, nodes) {
 }
 
 let hxSkill = (() => {
-  const stored = JSON.parse(localStorage.getItem('hx_skill') || '[]');
-  const defaults = [1, 0]; // 스킬 노드 1은 전직 시 기본 1렙
+  const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.hexaSkill) || '[]');
+  const defaults = [1, 0];
   return ['스킬 노드 1', '스킬 노드 2'].map((n, i) => ({ name:n, cur: stored[i]?.cur ?? defaults[i], tgt: stored[i]?.tgt ?? 30, max: 30 }));
 })();
-let hxMastery = _hxLoad('hx_mastery', ['마스터리 1','마스터리 2','마스터리 3','마스터리 4'], 30);
-let hxBoost   = _hxLoad('hx_boost',   ['부스트 1','부스트 2','부스트 3','부스트 4'], 30);
-let hxCommon  = _hxLoad('hx_common',  ['솔 야누스', '솔 헤카테'], 30);
+let hxMastery = _hxLoad(STORAGE_KEYS.hexaMastery, ['마스터리 1','마스터리 2','마스터리 3','마스터리 4'], 30);
+let hxBoost   = _hxLoad(STORAGE_KEYS.hexaBoost,   ['부스트 1','부스트 2','부스트 3','부스트 4'], 30);
+let hxCommon  = _hxLoad(STORAGE_KEYS.hexaCommon,  ['솔 야누스', '솔 헤카테'], 30);
 
 function renderNodeList(nodes, containerId, storageKey, icons=[]) {
   const list = document.getElementById(containerId);
@@ -65,7 +65,7 @@ function renderAllHexaLists() {
   hxBoost.forEach((n,i)   => { if(jd.boost[i])   n.name = jd.boost[i]; });
 
   // 공용 코어 개수가 직업마다 다를 수 있으므로 동적으로 맞춤
-  const stored = JSON.parse(localStorage.getItem('hx_common') || '[]');
+  const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.hexaCommon) || '[]');
   while (hxCommon.length < jd.common.length)  hxCommon.push({ name: jd.common[hxCommon.length], cur: stored[hxCommon.length]?.cur ?? 0, tgt: stored[hxCommon.length]?.tgt ?? 30, max: 30 });
   if (hxCommon.length > jd.common.length) hxCommon.length = jd.common.length;
   hxCommon.forEach((n,i)  => { if(jd.common[i])  n.name = jd.common[i]; });
@@ -77,10 +77,10 @@ function renderAllHexaLists() {
     ...jd.common.slice(2).map((_, i) => ico(15 + i)),
   ];
 
-  renderNodeList(hxSkill,   'hxSkillList',   'hx_skill',   [ico(1), ico(2)]);
-  renderNodeList(hxMastery, 'hxMasteryList', 'hx_mastery', [ico(5), ico(6), ico(7), ico(8)]);
-  renderNodeList(hxBoost,   'hxBoostList',   'hx_boost',   [ico(9), ico(10), ico(11), ico(12)]);
-  renderNodeList(hxCommon,  'hxCommonList',  'hx_common',  commonIcoFull);
+  renderNodeList(hxSkill,   'hxSkillList',   STORAGE_KEYS.hexaSkill,   [ico(1), ico(2)]);
+  renderNodeList(hxMastery, 'hxMasteryList', STORAGE_KEYS.hexaMastery, [ico(5), ico(6), ico(7), ico(8)]);
+  renderNodeList(hxBoost,   'hxBoostList',   STORAGE_KEYS.hexaBoost,   [ico(9), ico(10), ico(11), ico(12)]);
+  renderNodeList(hxCommon,  'hxCommonList',  STORAGE_KEYS.hexaCommon,  commonIcoFull);
 }
 
 document.getElementById('hxCalc').addEventListener('click', () => {

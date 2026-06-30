@@ -10,10 +10,10 @@ function nextThursday(from) {
 
 const genState = (() => {
   const def = { quest:0, held:0, pass:false, sel:{}, startDate: nextThursday() };
-  try { return Object.assign(def, JSON.parse(localStorage.getItem('lib_genesis_v2') || '{}')); }
+  try { return Object.assign(def, JSON.parse(localStorage.getItem(STORAGE_KEYS.genesis) || '{}')); }
   catch { return def; }
 })();
-function saveGen() { localStorage.setItem('lib_genesis_v2', JSON.stringify(genState)); }
+function saveGen() { localStorage.setItem(STORAGE_KEYS.genesis, JSON.stringify(genState)); }
 
 function bossInfo(id) { return BOSS_DATA.find(b => b.id === id) || { name:id, img:'' }; }
 function fmtTrace(n) { return Number(n).toLocaleString(); }
@@ -355,10 +355,10 @@ function renderGenesis() {
 ═══════════════════════════════════════════════ */
 const destState = (() => {
   const def = { heldResolve: 0, sel: {}, startDate: nextThursday() };
-  try { return Object.assign(def, JSON.parse(localStorage.getItem('lib_destiny_v1') || '{}')); }
+  try { return Object.assign(def, JSON.parse(localStorage.getItem(STORAGE_KEYS.destiny) || '{}')); }
   catch { return def; }
 })();
-function saveDest() { localStorage.setItem('lib_destiny_v1', JSON.stringify(destState)); }
+function saveDest() { localStorage.setItem(STORAGE_KEYS.destiny, JSON.stringify(destState)); }
 function fmtResolve(n) { return Number(n).toLocaleString(); }
 
 function calcDestinyResult() {

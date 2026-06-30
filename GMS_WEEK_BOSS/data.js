@@ -46,6 +46,18 @@ const DIFF_META = {
 const MAX_CRYSTALS = 180;
 const MAX_CHARS    = 20;
 
+const STORAGE_KEYS = {
+  boss:        'gms_boss_v2',
+  charHistory: 'gms_char_history',
+  font:        'gms_font',
+  genesis:     'lib_genesis_v2',
+  destiny:     'lib_destiny_v1',
+  hexaSkill:   'hx_skill',
+  hexaMastery: 'hx_mastery',
+  hexaBoost:   'hx_boost',
+  hexaCommon:  'hx_common',
+};
+
 const JOB_LIST = [
   {name:'Hero'},{name:'Paladin'},{name:'Dark Knight'},
   {name:'Arch Mage (Fire, Poison)'},{name:'Arch Mage (Ice, Lightning)'},{name:'Bishop'},

@@ -4,7 +4,7 @@
 
 /* ── state ── */
 let state = { chars: [], activeChar: -1, region: 'na' };
-const STORAGE_KEY = 'gms_boss_v2';
+const STORAGE_KEY = STORAGE_KEYS.boss;
 
 function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 function load() {
@@ -490,7 +490,7 @@ function openCharModal(idx = -1) {
 /* ── GMS 랭킹 조회 + 히스토리 ──
    랭킹 API는 '현재 상태'만 제공하므로, 조회할 때마다 스냅샷
    (날짜·레벨·경험치·캐릭터이미지)을 로컬에 누적해 히스토리를 만든다. */
-const HIST_KEY = 'gms_char_history';
+const HIST_KEY = STORAGE_KEYS.charHistory;
 function loadHist() { try { return JSON.parse(localStorage.getItem(HIST_KEY) || '{}'); } catch { return {}; } }
 function saveHist(h) { localStorage.setItem(HIST_KEY, JSON.stringify(h)); }
 function histKeyOf(d) { return `${(d.region||'NA').toLowerCase()}_${d.reboot?'r':'n'}_${(d.name||'').toLowerCase()}`; }
@@ -900,7 +900,7 @@ function renderCharInfo() {
 }
 
 /* ── 폰트 선택 ── */
-const FONT_KEY = 'gms_font';
+const FONT_KEY = STORAGE_KEYS.font;
 const fontDdBtn  = document.getElementById('fontDdBtn');
 const fontDdMenu = document.getElementById('fontDdMenu');
 const fontDdLabel = document.getElementById('fontDdLabel');
