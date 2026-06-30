@@ -69,9 +69,9 @@
   --extreme-bg: #1c1c1c; --extreme-fg: #e0473c;
 
   /* 諛섍꼍 */
-  --radius-sm:  10px;
-  --radius:     16px;
-  --radius-lg:  24px;
+  --radius-sm:  4px;
+  --radius:     6px;
+  --radius-lg:  8px;
   --radius-pill:999px;
 }
 
