@@ -266,8 +266,8 @@ function renderBossTable() {
     const diffOptsHtml = `<option value="">없음</option>` +
       diffs.map(d => `<option value="${d}"${activeDiff===d?' selected':''}>${DIFF_META[d].label}</option>`).join('');
     const pillsHtml = `<div class="boss-diff-wrap">
-      ${pillDisplay}
       <select class="boss-diff-sel" data-boss="${boss.id}">${diffOptsHtml}</select>
+      <span class="boss-diff-pill">${pillDisplay}</span>
     </div>`;
 
     const maxP  = activeDiff ? getMaxParty(boss, activeDiff) : 6;
