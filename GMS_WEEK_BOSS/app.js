@@ -931,34 +931,24 @@ function renderCharInfo() {
   });
 }
 
-/* ── 폰트 선택 ── */
+/* ── 설정 모달 ── */
 const FONT_KEY = STORAGE_KEYS.font;
-const fontDdBtn  = document.getElementById('fontDdBtn');
-const fontDdMenu = document.getElementById('fontDdMenu');
-const fontDdLabel = document.getElementById('fontDdLabel');
+const overlaySettings = document.getElementById('overlaySettings');
+document.getElementById('btnSettings').addEventListener('click', () => overlaySettings.classList.add('open'));
+document.getElementById('settingsClose').addEventListener('click', () => overlaySettings.classList.remove('open'));
+overlaySettings.addEventListener('click', e => { if (e.target === overlaySettings) overlaySettings.classList.remove('open'); });
 
 function applyFont(name) {
   document.body.style.fontFamily = `'${name}', 'Segoe UI', 'Malgun Gothic', sans-serif`;
   localStorage.setItem(FONT_KEY, name);
-  const active = fontDdMenu.querySelector(`[data-font="${name}"]`);
-  if (active) {
-    fontDdLabel.textContent = active.textContent;
-    fontDdLabel.style.fontFamily = active.style.fontFamily;
-    fontDdMenu.querySelectorAll('.font-dd__item').forEach(b => b.classList.toggle('active', b === active));
-  }
+  document.querySelectorAll('.settings-font-btns [data-font]').forEach(b => {
+    b.classList.toggle('sbtn--primary', b.dataset.font === name);
+  });
 }
 
-fontDdBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  fontDdMenu.classList.toggle('open');
+document.querySelectorAll('.settings-font-btns [data-font]').forEach(btn => {
+  btn.addEventListener('click', () => applyFont(btn.dataset.font));
 });
-fontDdMenu.querySelectorAll('.font-dd__item').forEach(btn => {
-  btn.addEventListener('click', () => {
-    applyFont(btn.dataset.font);
-    fontDdMenu.classList.remove('open');
-  });
-});
-document.addEventListener('click', () => fontDdMenu.classList.remove('open'));
 
 /* ── 초기화 ── */
 load();
