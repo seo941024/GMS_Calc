@@ -755,8 +755,8 @@ document.getElementById('fileImport').addEventListener('change', e => {
   const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
-    try { state = JSON.parse(ev.target.result); save(); renderCharList(); renderBossTable(); alert('불러오기 완료!'); }
-    catch { alert('파일 형식이 올바르지 않습니다.'); }
+    try { state = JSON.parse(ev.target.result); save(); renderCharList(); renderBossTable(); showToast('불러오기 완료!'); }
+    catch { showToast('파일 형식이 올바르지 않습니다.'); }
   };
   reader.readAsText(file);
   e.target.value = '';
@@ -878,23 +878,20 @@ function renderCharInfo() {
       box.querySelectorAll('.cg-card').forEach(c => c.classList.remove('drag-over'));
     });
 
-    // 터치 드래그 (수직 스크롤 허용: 일정 거리 이동 후 드래그 시작)
-    let touchStartX = 0, touchStartY = 0, touchDragging = false;
+    // 터치 드래그 — 롱프레스(400ms) 후 드래그 시작, 그 전엔 스크롤 허용
+    let longPressTimer = null, touchDragging = false;
     card.addEventListener('touchstart', e => {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
       touchDragging = false;
+      longPressTimer = setTimeout(() => {
+        touchDragging = true;
+        dragSrc = card;
+        card.classList.add('dragging');
+        if (navigator.vibrate) navigator.vibrate(40);
+      }, 400);
     }, { passive: true });
     card.addEventListener('touchmove', e => {
-      const dx = Math.abs(e.touches[0].clientX - touchStartX);
-      const dy = Math.abs(e.touches[0].clientY - touchStartY);
-      if (!touchDragging && (dx > 8 || dy > 8)) {
-        if (dx > dy) { touchDragging = true; }  // 수평 이동 → 드래그
-        else { return; }                          // 수직 이동 → 스크롤 허용
-      }
-      if (!touchDragging) return;
+      if (!touchDragging) { clearTimeout(longPressTimer); return; }
       e.preventDefault();
-      if (!dragSrc) { dragSrc = card; card.classList.add('dragging'); }
       const touch = e.touches[0];
       const el = document.elementFromPoint(touch.clientX, touch.clientY);
       const target = el && el.closest('.cg-card');
@@ -902,11 +899,13 @@ function renderCharInfo() {
       if (target && target !== dragSrc) target.classList.add('drag-over');
     }, { passive: false });
     card.addEventListener('touchend', e => {
+      clearTimeout(longPressTimer);
       card.classList.remove('dragging');
+      box.querySelectorAll('.cg-card').forEach(c => c.classList.remove('drag-over'));
+      if (!touchDragging) { dragSrc = null; return; }
       const touch = e.changedTouches[0];
       const el = document.elementFromPoint(touch.clientX, touch.clientY);
       const target = el && el.closest('.cg-card');
-      box.querySelectorAll('.cg-card').forEach(c => c.classList.remove('drag-over'));
       if (!target || target === dragSrc) { dragSrc = null; return; }
       const from = parseInt(dragSrc.dataset.ci);
       const to   = parseInt(target.dataset.ci);
@@ -917,6 +916,12 @@ function renderCharInfo() {
       else if (from > to && state.activeChar >= to && state.activeChar < from) state.activeChar++;
       dragSrc = null;
       save(); renderCharList(); renderBossTable(); renderCharInfo();
+    });
+    card.addEventListener('touchcancel', () => {
+      clearTimeout(longPressTimer);
+      card.classList.remove('dragging');
+      box.querySelectorAll('.cg-card').forEach(c => c.classList.remove('drag-over'));
+      dragSrc = null; touchDragging = false;
     });
 
     card.addEventListener('dragover', e => {
@@ -948,6 +953,15 @@ const overlaySettings = document.getElementById('overlaySettings');
 document.getElementById('btnSettings').addEventListener('click', () => overlaySettings.classList.add('open'));
 document.getElementById('settingsClose').addEventListener('click', () => overlaySettings.classList.remove('open'));
 overlaySettings.addEventListener('click', e => { if (e.target === overlaySettings) overlaySettings.classList.remove('open'); });
+
+document.getElementById('btnResetAll').addEventListener('click', () => {
+  document.getElementById('confirmMsg').textContent = '모든 데이터를 초기화하시겠습니까? 되돌릴 수 없습니다.';
+  document.getElementById('overlayConfirm').classList.add('open');
+  document.getElementById('confirmOk').onclick = () => {
+    Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
+    location.reload();
+  };
+});
 
 function applyFont(name) {
   document.body.style.fontFamily = `'${name}', 'Segoe UI', 'Malgun Gothic', sans-serif`;

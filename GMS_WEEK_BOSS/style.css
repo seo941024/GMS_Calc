@@ -1682,10 +1682,10 @@ tbody tr:hover { background: rgba(139,92,246,.05); }
 .sec-title { text-shadow: 0 0 22px rgba(167,139,250,.25); }
 
 /* ── 설정 모달 ── */
-.modal--settings { width: min(720px, 96vw); }
+.modal--settings { width: min(880px, 96vw); }
 .settings-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   padding: 20px;
 }
@@ -1716,7 +1716,7 @@ tbody tr:hover { background: rgba(139,92,246,.05); }
   gap: 8px;
 }
 @media (max-width: 768px) {
-  .settings-grid { grid-template-columns: 1fr; }
+  .settings-grid { grid-template-columns: 1fr 1fr; }
 }
 
 /* ── 11. 저성능/모션축소 환경: 드리프트·스윕 전부 정지 ── */
