@@ -175,7 +175,7 @@ function updateCrystalBar() {
   const elW = document.getElementById('totalWeekMeso');
   if (elW) elW.textContent = fmtMeso(weekTotal);
   const elM = document.getElementById('totalMonthMeso');
-  if (elM) { elM.textContent = (monthTotal < 0 ? '-' : '') + fmtMeso(Math.abs(monthTotal)); elM.style.color = monthTotal < 0 ? '#f87171' : ''; }
+  if (elM) { elM.textContent = (monthTotal < 0 ? '-' : '') + fmtMeso(Math.abs(monthTotal)); elM.style.color = monthTotal < 0 ? 'var(--danger)' : ''; }
 }
 
 /* ── 캐릭터 목록 렌더 (사이드바: active 1개만) ── */
@@ -303,14 +303,14 @@ function renderBossTable() {
   const weekNet = total - wCost;
   const wEl2 = document.getElementById('weeklyTotal');
   wEl2.textContent = (weekNet < 0 ? '-' : '') + fmtMeso(Math.abs(weekNet));
-  wEl2.style.color = weekNet < 0 ? '#f87171' : 'var(--accent)';
+  wEl2.style.color = weekNet < 0 ? 'var(--danger)' : 'var(--accent)';
   const resets = thursdaysInMonth();
   const monthEl = document.getElementById('monthlyTotal');
   const monthSubEl = document.getElementById('monthResetCount');
   if (monthEl) {
     const monthNet = charMonthlyMeso(ch) - mCost;
     monthEl.textContent = (monthNet < 0 ? '-' : '') + fmtMeso(Math.abs(monthNet));
-    monthEl.style.color = monthNet < 0 ? '#f87171' : '';
+    monthEl.style.color = monthNet < 0 ? 'var(--danger)' : '';
   }
   if (monthSubEl) monthSubEl.textContent = `(주${resets}회 기준)`;
 
@@ -444,8 +444,8 @@ function updateRentalTotals() {
   const mCost2 = rentalMonthlyCost();
   const weekNet = bossWeekly - wCost2;
   const monthNet = charMonthlyMeso(ch) - mCost2;
-  if (wEl) { wEl.textContent = (weekNet < 0 ? '-' : '') + fmtMeso(Math.abs(weekNet)); wEl.style.color = weekNet < 0 ? '#f87171' : 'var(--accent)'; }
-  if (mEl) { mEl.textContent = (monthNet < 0 ? '-' : '') + fmtMeso(Math.abs(monthNet)); mEl.style.color = monthNet < 0 ? '#f87171' : 'var(--accent)'; }
+  if (wEl) { wEl.textContent = (weekNet < 0 ? '-' : '') + fmtMeso(Math.abs(weekNet)); wEl.style.color = weekNet < 0 ? 'var(--danger)' : 'var(--accent)'; }
+  if (mEl) { mEl.textContent = (monthNet < 0 ? '-' : '') + fmtMeso(Math.abs(monthNet)); mEl.style.color = monthNet < 0 ? 'var(--danger)' : 'var(--accent)'; }
   updateCrystalBar();
 }
 
@@ -466,9 +466,14 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ── 보스 초기화 ── */
 document.getElementById('btnResetBoss').addEventListener('click', () => {
   const ch = state.chars[state.activeChar];
-  if (!ch || !confirm(`${ch.name}의 보스 체크를 초기화할까요?`)) return;
-  ch.checks = {};
-  save(); renderBossTable(); renderCharList();
+  if (!ch) return;
+  document.getElementById('confirmMsg').textContent = `'${ch.name}'의 보스 체크를 초기화할까요?`;
+  document.getElementById('overlayConfirm').classList.add('open');
+  document.getElementById('confirmOk').onclick = () => {
+    ch.checks = {};
+    save(); document.getElementById('overlayConfirm').classList.remove('open');
+    renderBossTable(); renderCharList();
+  };
 });
 
 /* ── 캐릭터 모달 ── */
