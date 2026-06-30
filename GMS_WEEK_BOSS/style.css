@@ -1567,16 +1567,13 @@ body.sidebar-open .hamburger span:nth-child(3) { transform: translateY(-6px) rot
 
   /* 큐브 결과 모달: 좌우 분할 → 세로 스택 */
   .cube-result-body { flex-direction: column; overflow: visible; }
-  .cube-result-left { flex: none; }
-  .modal--cube-result {
-    width: calc(100vw - 16px);
-    max-height: calc(100dvh - 20px);
-    border-radius: var(--radius);
-  }
-  .modal--cube-result .modal__body {
-    overflow-y: auto; padding: 14px; flex: 1; max-height: none;
-  }
+  .cube-result-left { flex: none; width: 100%; min-width: 0; }
   .cube-result-right { overflow-y: visible; border: none; padding: 0; }
+  .modal--cube-result { width: calc(100vw - 16px); max-height: calc(100dvh - 20px); }
+  .modal--cube-result .modal__body { overflow-y: auto; padding: 14px; flex: 1; max-height: none; }
+  .sf-res-item { gap: 8px; }
+  .sf-res-val { font-size: .82rem; text-align: right; min-width: 0; word-break: break-all; }
+  .sf-res-val.big { font-size: .95rem; }
 
   /* 추옵·스타포스·큐브·환산 좌우 → 세로 (2~5) */
   .sf-layout { grid-template-columns: 1fr !important; }
