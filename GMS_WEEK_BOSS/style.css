@@ -144,13 +144,15 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
   color: #c4b5fd;
   background: linear-gradient(135deg, #1e1245 0%, #150d35 100%);
   border: 1.5px solid rgba(139,92,246,.45);
-  transition: background .2s, border-color .2s, color .2s, box-shadow .2s;
+  transition: background .2s, border-color .2s, color .2s, box-shadow .2s, transform .18s;
   box-shadow: 0 0 0 0 transparent, 0 2px 8px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08);
 }
+#headerBtnSettings { color: var(--text-sub); }
 .hbtn:hover {
   background: linear-gradient(135deg, #2d1a6e 0%, #1a0f45 100%);
   border-color: var(--primary);
   color: #fff;
+  transform: translateY(-1px);
   box-shadow: 0 0 16px rgba(139,92,246,.45), 0 2px 8px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1);
 }
 .hbtn:active {
