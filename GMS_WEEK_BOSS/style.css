@@ -1571,6 +1571,7 @@ body.sidebar-open .hamburger span:nth-child(3) { transform: translateY(-6px) rot
   .cube-result-right { overflow-y: visible; border: none; padding: 0; }
   .modal--cube-result { width: calc(100vw - 32px); max-height: 88dvh; }
   .modal--cube-result .modal__body { overflow-y: auto !important; padding: 20px !important; flex: 1; max-height: none; }
+  .cube-result-body { padding: 16px; overflow-y: auto; max-height: calc(88dvh - 56px); }
   .sf-res-item { gap: 8px; }
   .sf-res-val { font-size: .82rem; text-align: right; min-width: 0; word-break: break-all; }
   .sf-res-val.big { font-size: .95rem; }
