@@ -335,7 +335,7 @@ const GENESIS_QUESTS = [
   { name:'루시드',       cum:4500 },
   { name:'진 힐라',      cum:5500 },
 ];
-const GENESIS_TARGET = 5500;
+const GENESIS_TARGET = 6500;
 const TRACE_HOLD_MAX = 3000;
 const GENESIS_PASS_MULT = 3;     // 제네시스 패스: 흔적 획득 3배
 
