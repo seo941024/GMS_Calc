@@ -226,10 +226,6 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
 }
 
 /* 罹먮┃???곸뿭 */
-.sb-brand { display: none; align-items: center; gap: 10px; padding: 16px 14px 12px; border-bottom: 1px solid var(--border); }
-.sb-brand__img { width: 28px; height: 28px; object-fit: contain; }
-.sb-brand__title { font-size: .95rem; font-weight: 800; color: var(--text); }
-@media (max-width: 768px) { .sb-brand { display: flex; } }
 .sb-char-area { border-bottom: 1px solid var(--border); }
 .sb-char-head {
   display: flex; align-items: center;
@@ -1511,7 +1507,7 @@ body.sidebar-open .hamburger span:nth-child(3) { transform: translateY(-6px) rot
 @media (max-width: 768px) {
   .hamburger { display: flex; }
   .header { padding: 0 14px; gap: 10px; }
-  .header__logo--desktop { display: none; }
+  .header__title { display: none; }
   .header__rlabel { display: none; }
   .header__center { gap: 6px; }
   .header__rlabel { display: inline; font-size: .68rem; }
