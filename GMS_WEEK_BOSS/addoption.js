@@ -381,11 +381,11 @@ function flameSimulate() {
       // 기하분포: 상위 n% 달성 횟수 = ceil(log(1 - n/100) / log(1 - p))
       const pctCount = pct => Math.ceil(Math.log(1 - pct / 100) / Math.log(1 - p));
 
-      const pcts = [50, 25, 10, 5, 1];
+      const pcts = [50, 75, 90, 95, 99];
       const rows = pcts.map(pct => `
         <div class="sf-res-item">
           <span class="sf-res-label">상위 ${pct}%</span>
-          <span class="sf-res-val">${pctCount(100 - pct).toLocaleString()}개</span>
+          <span class="sf-res-val">${pctCount(pct).toLocaleString()}개</span>
         </div>`).join('');
 
       resEl.innerHTML = `
