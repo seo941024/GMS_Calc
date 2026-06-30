@@ -950,7 +950,7 @@ function renderCharInfo() {
 /* ── 설정 모달 ── */
 const FONT_KEY = STORAGE_KEYS.font;
 const overlaySettings = document.getElementById('overlaySettings');
-document.getElementById('btnSettings').addEventListener('click', () => overlaySettings.classList.add('open'));
+document.getElementById('sbBtnSettings').addEventListener('click', () => overlaySettings.classList.add('open'));
 document.getElementById('settingsClose').addEventListener('click', () => overlaySettings.classList.remove('open'));
 overlaySettings.addEventListener('click', e => { if (e.target === overlaySettings) overlaySettings.classList.remove('open'); });
 

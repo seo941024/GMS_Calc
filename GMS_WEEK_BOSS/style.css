@@ -347,6 +347,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
   padding: 6px 10px 16px;
   display: flex; flex-direction: column; gap: 2px; flex: 0 0 auto;
 }
+.sb-bottom { margin-top: auto; border-top: 1px solid var(--border); padding: 6px 0; }
 .sb-nav__item {
   display: flex; align-items: center; gap: 12px;
   padding: 11px 14px; border-radius: 12px;
