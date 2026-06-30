@@ -1505,7 +1505,7 @@ body.sidebar-open .hamburger span:nth-child(3) { transform: translateY(-6px) rot
   .header { padding: 0 14px; gap: 10px; }
   .header__title { font-size: .9rem; }
   .header__center { gap: 6px; }
-  .header__rlabel { display: none; }
+  .header__rlabel { display: inline; font-size: .68rem; }
   .header__timer { font-size: .76rem; padding: 4px 10px; }
   .header__right .hbtn { padding: 6px 10px; font-size: .72rem; }
 
