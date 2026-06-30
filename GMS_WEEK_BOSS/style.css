@@ -641,7 +641,7 @@ tr.done .boss-thumb img { filter: none; }
   color: var(--text-sub);
   border-color: var(--border);
 }
-.sbtn--ghost:hover { background: rgba(255,255,255,.12); color: var(--text); }
+.sbtn--ghost:hover { background: rgba(255,255,255,.12); color: var(--text); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,.45); }
 .sbtn--danger { background: var(--danger); color: #fff; box-shadow: 0 4px 12px rgba(240,80,96,.3); }
 .sbtn--danger:hover { transform: translateY(-1px); filter: brightness(1.1); }
 .w100 { width: 100%; justify-content: center; }
