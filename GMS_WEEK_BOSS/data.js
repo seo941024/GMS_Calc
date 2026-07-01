@@ -14,7 +14,7 @@ const BOSS_DATA = [
   { id:'blackmage',  name:'검은 마법사',         diffs:{hard:4_500_000_000,extreme:18_000_000_000},                                      maxParty:6, minLevel:255, img:'images/bosses/blackmage.webp', monthly:true },
   { id:'jinhilla',   name:'진 힐라',             diffs:{normal:581_880_000,hard:762_105_000},                                            maxParty:6, minLevel:250, img:'images/bosses/jinhilla.webp' },
   { id:'dunkel',     name:'듄켈',                diffs:{normal:316_875_000,hard:667_920_000},                                            maxParty:6, minLevel:255, img:'images/bosses/dunkel.webp' },
-  { id:'dusk',       name:'더스크',              diffs:{normal:297_675_000,hard:563_945_000},                                            maxParty:6, minLevel:245, img:'images/bosses/dusk.webp' },
+  { id:'dusk',       name:'더스크',              diffs:{normal:297_675_000,chaos:563_945_000},                                           maxParty:6, minLevel:245, img:'images/bosses/dusk.webp' },
   { id:'will',       name:'윌',                  diffs:{easy:246_744_750,normal:279_075_000,hard:621_810_000},                            maxParty:6, minLevel:235, img:'images/bosses/will.webp' },
   { id:'lucid',      name:'루시드',              diffs:{easy:237_009_375,normal:253_828_125,hard:504_000_000},                           maxParty:6, minLevel:220, img:'images/bosses/lucid.webp' },
   { id:'gaensl',     name:'가디언 엔젤 슬라임',  diffs:{normal:231_673_500,chaos:600_578_125},                                           maxParty:6, minLevel:200, img:'images/bosses/gaensl.webp' },
