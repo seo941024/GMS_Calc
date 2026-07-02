@@ -120,7 +120,7 @@ function flameScoreSim() {
 
   setTimeout(() => {
     try {
-      const N = 200_000;
+      const N = 1_000_000;
       const results = Object.entries(FLAME_TYPES).map(([key, meta]) => {
         let k = 0;
         for (let i = 0; i < N; i++) {
