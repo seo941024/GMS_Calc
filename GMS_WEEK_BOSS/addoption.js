@@ -400,7 +400,7 @@ function flameSimulate() {
     </div>
     ${rows}
     <p style="font-size:.72rem;color:var(--text-sub);margin-top:10px;text-align:right">
-      달성 확률 ${pStr} (정확 계산)
+      달성 확률 ${pStr}
     </p>`;
 }
 
